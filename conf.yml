@@ -1,0 +1,25 @@
+---
+# Exchange and market pairs-------------------------------------------------
+#
+exchange:
+    kraken:
+        symbol: ETH/EUR
+        time_unit: 1d
+        candles: 365
+    # - EOS/EUR:
+    #     exhcnage: kraken
+
+# Indicators' parameters
+
+indicators:
+    rsi:
+        period:14
+    macd:
+        period:14
+    stoch_rsi:
+        period:14
+
+#logging level
+Logging_level: INFO
+
+
