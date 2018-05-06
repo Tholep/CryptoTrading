@@ -10,6 +10,23 @@ from talib import abstract
 
 
 class indicators():
+    def __init__(self):
+        """
+        Initialize the class
+        """
+
+    def calculate(self,historical_data,indicators_conf):
+        """Perform technical indicator calculation and add to the original data
+        Args:
+            historical_data: a historical_data contains historical data.
+            indicators_conf: is a dictionary read from conf.yml to provide parameters for calculations.
+        Returns:
+            pandas.DataFrame: containing historical data and other indicators
+        """
+        rsi=self.rsi_cal(historical_data,indicators_conf["rsi"]["period"])
+        macd=self.macd_cal(historical_data)
+        stoch_rsi=self.stochastic_rsi_cal(historical_data,indicators_conf["stoch_rsi"]["period"],indicators_conf["stoch_rsi"]["fastk"],indicators_conf["stoch_rsi"]["fastd"])
+        return pandas.concat([historical_data,rsi,macd,stoch_rsi],axis=1)
     def rsi_cal(self, historical_data, period_count=14):
         """Performs an RSI analysis on the historical data
 
@@ -18,10 +35,10 @@ class indicators():
             period_count (int, optional): Defaults to 14. The number of data points to consider for
                 our RSI.
         Returns:
-            pandas.DataFrame: A dataframe containing the indicators and hot/cold values.
+            pandas.DataFrame: A historical_data containing the indicators and hot/cold values.
         """
 
-        #dataframe = self.convert_to_dataframe(historical_data)
+        #historical_data = self.convert_to_historical_data(historical_data)
         rsi_values = abstract.RSI(historical_data, period_count).to_frame()
         rsi_values.fillna(value=0, inplace=True)
         rsi_values.rename(columns={rsi_values.columns[0]: 'rsi'}, inplace=True)
@@ -33,7 +50,7 @@ class indicators():
         Args:
             historical_data (list): A matrix of historical OHCLV data.
          Returns:
-            pandas.DataFrame: A dataframe containing the indicators and hot/cold values.
+            pandas.DataFrame: A historical_data containing the indicators and hot/cold values.
         """
 
         macd_values = abstract.MACD(historical_data).iloc[:]
@@ -51,10 +68,30 @@ class indicators():
             fastd: Default is 3, moving average of fastk.
 
         Returns:
-            pandas.DataFrame: A dataframe containing the indicators and hot/cold values.
+            pandas.DataFrame: A historical_data containing the indicators and hot/cold values.
         """
 
-        stoch_rsi=abstract.STOCHRSI(historical_data,timeperiod,fastk_period,fastd_period)
-        return stoch_rsi
+        # stoch_rsi=abstract.STOCHRSI(historical_data,timeperiod,fastk_period,fastd_period)
+        # stoch_rsi.fillna(value=0, inplace=True)
+        rsi_period_count = period_count * 2
+        rsi_values = abstract.RSI(historical_data, rsi_period_count).to_frame()
+        rsi_values.fillna(value=0, inplace=True)
+        rsi_values.rename(columns={0: 'rsi'}, inplace=True)
+
+        rsi_values = rsi_values.assign(stoch_rsi=numpy.nan)
+        for index in range(period_count, rsi_values.shape[0]):
+            start_index = index - period_count
+            last_index = index + 1
+            rsi_min = rsi_values['rsi'].iloc[start_index:last_index].min()
+            rsi_max = rsi_values['rsi'].iloc[start_index:last_index].max()
+            stoch_rsi = (100 * ((rsi_values['rsi'][index] - rsi_min) / (rsi_max - rsi_min)))
+            rsi_values['stoch_rsi'][index] = stoch_rsi
+
+        rsi_values['fast_k'] = rsi_values['stoch_rsi'].rolling(window=fastk_period).mean()
+        rsi_values['fast_d'] = rsi_values['fast_k'].rolling(window=fastd_period).mean()
+        rsi_values.fillna(value=0, inplace=True)
+
+        return rsi_values
+
 
 

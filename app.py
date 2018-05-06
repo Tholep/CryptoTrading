@@ -9,6 +9,8 @@ from datetime import datetime
 #import modules
 from historicaldata import HistorialData
 from analyzer import indicators
+from notifier import TelegramNotifier
+
 
 def main():
     # Set up logger
@@ -19,6 +21,7 @@ def main():
     # 	#raise e
 	conf=yaml.load(open("conf.yml"))
 	technical_data=indicators()
+	telegram=TelegramNotifier(conf["notifier"]["telegram"]["api"],conf["notifier"]["telegram"]["chat_id"])
 	logging.basicConfig(
 	        format="%(message)s",
 	        stream=sys.stdout,
@@ -28,12 +31,14 @@ def main():
 	exchange_conf=conf["exchange"].keys()
 	ex=HistorialData(exchange_conf)
 	for exchange in exchange_conf:
+		#get historical data from exchange and symbol identified
 		logging.info("Get historical data from %s",exchange)
 		data=ex.get_historical_data(conf["exchange"][exchange]["symbol"],exchange,conf["exchange"][exchange]["time_unit"],conf["exchange"][exchange]["candles"])
 		data=to_dataframe(data)
+		data=technical_data.calculate(data,conf["indicators"])
+		# Aplly strategy(s) to this data
 		print data
-		print len(data)
-		# print technical_data.stochastic_rsi_cal(data)
+
 
 def to_dataframe(data_array):
 	dataframe = df(data_array)
