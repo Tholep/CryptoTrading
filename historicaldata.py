@@ -1,10 +1,9 @@
 """Interface for querying historical data from specified exchange
 """
-
 import ccxt
 import logging
-#from tenacity import retry, retry_if_exception_type, stop_after_attempt
-
+import re
+from datetime import datetime, timedelta
 class HistorialData(object):
 
 
@@ -42,16 +41,39 @@ class HistorialData(object):
         Returns:
             list: Contains a list of lists which contain timestamp, open, high, low, close, volume.
         """
+        timeframe_regex = re.compile('([0-9]+)([a-zA-Z])')
+        timeframe_matches = timeframe_regex.match(time_unit)
+        time_quantity = timeframe_matches.group(1)
+        time_period = timeframe_matches.group(2)
+
+        timedelta_values = {
+            'm': 'minutes',
+            'h': 'hours',
+            'd': 'days',
+            'w': 'weeks',
+            'M': 'months',
+            'y': 'years'
+        }
+        
+        timedelta_args = { timedelta_values[time_period]: int(time_quantity) }
+
+        delta = timedelta(**timedelta_args)
+
+        max_days_date = datetime.utcnow() - (limit * delta)
+
+        start_date = int((max_days_date - datetime(1970,1,1)).total_seconds() * 1000)
+        print start_date
+
         try:
             
-            historical_data = self.exchanges[exchange].fetch_ohlcv(symbol,timeframe=time_unit,limit=limit)
+            historical_data = self.exchanges[exchange].fetch_ohlcv(symbol,timeframe=time_unit,since=start_date)
         except Exception as e:
             raise e
         
 
         if not historical_data:
             #logging.error("Can't fetch historical data for %s - %s", (symbol,exchange))
-            raise ValueError('No historical data provided returned by exchange.')
+            logging.info('No historical data provided returned by exchange.')
             
         # Sort by timestamp in ascending order
         historical_data.sort(key=lambda d: d[0])

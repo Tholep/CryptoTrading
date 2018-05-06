@@ -4,8 +4,8 @@
 exchange:
     kraken:
         symbol: ETH/EUR
-        time_unit: 1d
-        candles: 365
+        time_unit: 15m
+        candles: 5
     # - EOS/EUR:
     #     exhcnage: kraken
 
@@ -13,13 +13,18 @@ exchange:
 
 indicators:
     rsi:
-        period:14
+        period: 14
     macd:
-        period:14
+        period_macd_1: 12
+        period_macd_2: 26
+        #signal line
+        period_macd_signal: 9
     stoch_rsi:
-        period:14
+        period: 14
+        fastk: 3
+        fastd: 3
 
 #logging level
-Logging_level: INFO
+Logging_level: DEBUG
 
 

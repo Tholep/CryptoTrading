@@ -1,7 +1,5 @@
 #import library
-import time
 import logging
-import structlog
 import sys
 import yaml
 import pandas
@@ -14,7 +12,13 @@ from analyzer import indicators
 
 def main():
     # Set up logger
+    # try:
+    # 	conf=yaml.load(open("conf.yml"))
+    # except Exception as e:
+    # 	logging.error("Cant load configuration files or there are errors in configuration")
+    # 	#raise e
 	conf=yaml.load(open("conf.yml"))
+	technical_data=indicators()
 	logging.basicConfig(
 	        format="%(message)s",
 	        stream=sys.stdout,
@@ -29,7 +33,8 @@ def main():
 		data=to_dataframe(data)
 		print data
 		print len(data)
-		indicators.rsi_cal(data)
+		# print technical_data.stochastic_rsi_cal(data)
+
 def to_dataframe(data_array):
 	dataframe = df(data_array)
 	dataframe.columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
