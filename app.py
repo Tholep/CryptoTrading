@@ -13,13 +13,11 @@ from notifier import TelegramNotifier
 
 
 def main():
-    # Set up logger
-    # try:
-    # 	conf=yaml.load(open("conf.yml"))
-    # except Exception as e:
-    # 	logging.error("Cant load configuration files or there are errors in configuration")
-    # 	#raise e
-	conf=yaml.load(open("conf.yml"))
+	try:
+		conf=yaml.load(open("conf.yml"))
+	except Exception as e:
+		raise e
+	
 	technical_data=indicators()
 	telegram=TelegramNotifier(conf["notifier"]["telegram"]["api"],conf["notifier"]["telegram"]["chat_id"])
 	logging.basicConfig(
