@@ -62,8 +62,6 @@ class HistorialData(object):
         max_days_date = datetime.utcnow() - (limit * delta)
 
         start_date = int((max_days_date - datetime(1970,1,1)).total_seconds() * 1000)
-        print start_date
-
         try:
             
             historical_data = self.exchanges[exchange].fetch_ohlcv(symbol,timeframe=time_unit,since=start_date)

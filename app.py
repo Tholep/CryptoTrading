@@ -8,18 +8,20 @@ from datetime import datetime
 
 #import modules
 from historicaldata import HistorialData
-from analyzer import indicators
 from notifier import TelegramNotifier
-
+from strategy import strategy
 
 def main():
 	try:
 		conf=yaml.load(open("conf.yml"))
 	except Exception as e:
 		raise e
+	try:
+		#technical_data=indicators()
+		telegram=TelegramNotifier(conf["notifier"]["telegram"]["api"],conf["notifier"]["telegram"]["chat_id"])
+	except Exception as e:
+		logging.error("Cannot load telegram object")
 	
-	technical_data=indicators()
-	telegram=TelegramNotifier(conf["notifier"]["telegram"]["api"],conf["notifier"]["telegram"]["chat_id"])
 	logging.basicConfig(
 	        format="%(message)s",
 	        stream=sys.stdout,
@@ -33,11 +35,13 @@ def main():
 		logging.info("Get historical data from %s",exchange)
 		data=ex.get_historical_data(conf["exchange"][exchange]["symbol"],exchange,conf["exchange"][exchange]["time_unit"],conf["exchange"][exchange]["candles"])
 		data=to_dataframe(data)
-		data=technical_data.calculate(data,conf["indicators"])
+		#data=technical_data.calculate(data,conf["indicators"])
 		# Aplly strategy(s) to this data
-		print data
+		tatics=strategy(data,conf["exchange"][exchange],conf["indicators"])
+		results=tatics.strategy_launcher()
+		print results["rsi_stochrsi_strategy"]
 
-
+		print results["rsi_stochrsi_strategy"]
 def to_dataframe(data_array):
 	dataframe = df(data_array)
 	dataframe.columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume']

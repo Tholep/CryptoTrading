@@ -3,9 +3,11 @@
 #
 exchange:
     kraken:
-        symbol: ETH/EUR
+        symbol: XRP/EUR
         time_unit: 1d
         candles: 365
+        wallet: 5000
+        strategies: [rsi_stochrsi_strategy]
     # - EOS/EUR:
     #     exhcnage: kraken
 
@@ -14,13 +16,15 @@ exchange:
 indicators:
     rsi:
         period: 14
+        period_range: 60
     macd:
         period_macd_1: 12
         period_macd_2: 26
         #signal line
         period_macd_signal: 9
     stoch_rsi:
-        period: 14
+        period: 17
+        period_range: 
         fastk: 3
         fastd: 3
 
@@ -29,7 +33,7 @@ Logging_level: DEBUG
 
 notifier:
     telegram:
-        api: 
-        chat_id: 
+        api: enter_api
+        chat_id: enter_chatid
 
 

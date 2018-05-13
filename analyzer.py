@@ -15,18 +15,23 @@ class indicators():
         Initialize the class
         """
 
-    def calculate(self,historical_data,indicators_conf):
-        """Perform technical indicator calculation and add to the original data
-        Args:
-            historical_data: a historical_data contains historical data.
-            indicators_conf: is a dictionary read from conf.yml to provide parameters for calculations.
-        Returns:
-            pandas.DataFrame: containing historical data and other indicators
-        """
-        rsi=self.rsi_cal(historical_data,indicators_conf["rsi"]["period"])
-        macd=self.macd_cal(historical_data)
-        stoch_rsi=self.stochastic_rsi_cal(historical_data,indicators_conf["stoch_rsi"]["period"],indicators_conf["stoch_rsi"]["fastk"],indicators_conf["stoch_rsi"]["fastd"])
-        return pandas.concat([historical_data,rsi,macd,stoch_rsi],axis=1)
+    # def calculate_rsi_stoch_rsi(self,historical_data,indicators_conf):
+    #     """Perform technical indicator calculation and add to the original data
+    #     Args:
+    #         historical_data: a historical_data contains historical data.
+    #         indicators_conf: is a dictionary read from conf.yml to provide parameters for calculations.
+    #     Returns:
+    #         pandas.DataFrame: containing historical data and other indicators
+    #     """
+    #     #rsi=self.rsi_cal(historical_data,indicators_conf["rsi"]["period"])
+    #     #macd=self.macd_cal(historical_data)
+
+    #     #RSI and Stoch_RSI
+    #     if indicators_conf["stoch_rsi"]["perido_range"]:
+
+    #     else:
+    #         stoch_rsi=self.stochastic_rsi_cal(historical_data,indicators_conf["stoch_rsi"]["period"],indicators_conf["stoch_rsi"]["fastk"],indicators_conf["stoch_rsi"]["fastd"])
+    #     return pandas.concat([historical_data,rsi,macd,stoch_rsi],axis=1)
     def rsi_cal(self, historical_data, timeperiod=14):
         """Performs an RSI analysis on the historical data
 
