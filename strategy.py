@@ -54,9 +54,10 @@ class strategy(object):
 		data_length=len(data)
 		buying=[]
 		selling=[]
+		data=self.is_bearish(15,30,data)
 		for row in range(data_length):
 		#for row in data[["close","rsi","fast_k","fast_d"]].itertuples():
-			data=self.is_bearish(15,30,data)
+			
 			"""Buy decision
 			(1) in pullish market, try to join at the bottom based on RSI and stochatic RSI
 			(2) in bearish market (defined by the last 15 days, RSI above 50)
