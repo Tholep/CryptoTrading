@@ -40,8 +40,6 @@ def main():
 		tatics=strategy(data,conf["exchange"][exchange],conf["indicators"])
 		results=tatics.strategy_launcher()
 		print results["rsi_stochrsi_strategy"]
-
-		print results["rsi_stochrsi_strategy"]
 def to_dataframe(data_array):
 	dataframe = df(data_array)
 	dataframe.columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume']

@@ -3,7 +3,7 @@
 #
 exchange:
     kraken:
-        symbol: XRP/EUR
+        symbol: XMR/EUR
         time_unit: 1d
         candles: 365
         wallet: 5000

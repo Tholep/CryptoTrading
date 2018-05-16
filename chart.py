@@ -23,8 +23,8 @@ def macd(data):
 	"""
 	"""
 	macd = figure(width=600, height=200,x_axis_type="datetime",title="MACD - 26-12-9")
-	macd.line(data["datetime"],data["macd"],color="green",legend="Fast_k")
-	macd.line(data["datetime"],data["macdsignal"],color="red",legend="Fast_d")
+	macd.line(data["datetime"],data["macd"],color="green",legend="MACD")
+	macd.line(data["datetime"],data["macdsignal"],color="red",legend="MACD Signal")
 
-l=layout([rsi,stoch_rsi],sizing_mode="scale_height")
+#l=layout([rsi,stoch_rsi],sizing_mode="scale_height")
 

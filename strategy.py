@@ -71,7 +71,7 @@ class strategy(object):
 			macdhist=data.iloc[row]["macdhist"]
 			macd_up= (data.iloc[row]["macdhist"] >=data.iloc[row-1]["macdhist"]) and (data.iloc[row]["macdhist"] >=data.iloc[row-2]["macdhist"]) and (data.iloc[row]["macdhist"] >=data.iloc[row-3]["macdhist"])
 			
-			if (((rsi<30 or (rsi<70 and is_bearish_short and macdhist>=-10 and macd_up)) and rsi>0) and (fast_k<20 and fast_k>0 and fast_k>fast_d) and balance>0):
+			if (((rsi<30 or (rsi<70 and is_bearish_short and macdhist>=-10 and macd_up )) and rsi>0) and (fast_k<20 and fast_k>0 and fast_k>fast_d) and balance>0):
 				crypto+=(balance/close_price)*0.999 #close price, excluding 0.1% fee
 				balance=0 # after buying crypto
 				buying.append((date,close_price,crypto,balance)) #time,price, crypto, blance
@@ -91,7 +91,7 @@ class strategy(object):
 		if balance==0:
 			balance=crypto*data.iloc[-1]["close"]
 
-		return (period,fast_k_period,fast_d_period,balance,float(balance/self.exchange_conf["wallet"])*100,buying,selling)
+		return (period,fast_k_period,fast_d_period,balance,float((balance-self.exchange_conf["wallet"])/self.exchange_conf["wallet"])*100,buying,selling)
 
 	def is_bearish(self,candles_short,candles_long,data):
 		"""in bearish market (defined by the last 15 days, RSI above 50)
@@ -104,24 +104,7 @@ class strategy(object):
 		data["is_bearish_short"]=data["rsi_bearish"].rolling(candles_short).sum()==candles_short
 		data["is_bearish_long"]=data["rsi_bearish"].rolling(candles_long).sum()==candles_long
 		return data
-		# data_length=len(data)
-		# data["is_bearish_short"]=False
-		# data["is_bearish_long"]=False
-		# data["rsi_bearish"]=data["rsi"]>50
-		# for row in range(candles_short,data_length):
-		# 	data.iloc[row]["is_bearish_short"]=(data.iloc[row-candles_short:row][data["rsi_bearish"]==True]["rsi_bearish"].count()==candles_short)
-		# for row in range(candles_long,data_length):
-		# 	data.iloc[row]["is_bearish_long"]=(data.iloc[row-candles_long:row][data["rsi_bearish"]==True]["rsi_bearish"].count()==candles_long)
 
-		# return data
-
-
-
-		# check_bearish=data[data["is_bearish"]==True]["is_bearish"].count()
-		# if check_bearish==16:
-		# 	return True
-		# else:
-		# 	return False
 
 
 
