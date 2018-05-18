@@ -71,7 +71,7 @@ class strategy(object):
 			macdhist=data.iloc[row]["macdhist"]
 			macd_up= (data.iloc[row]["macdhist"] >=data.iloc[row-1]["macdhist"]) and (data.iloc[row]["macdhist"] >=data.iloc[row-2]["macdhist"]) and (data.iloc[row]["macdhist"] >=data.iloc[row-3]["macdhist"])
 			
-			if (((rsi<30 or (rsi<70 and is_bearish_short and macdhist>=-10 and macd_up)) and rsi>0) and (fast_k<20 and fast_k>0 and fast_k>fast_d) and balance>0):
+			if (((rsi<30 or (rsi<70 and is_bearish_short and macdhist>=-10 )) and rsi>0) and (fast_k<20 and fast_k>0 and fast_k>fast_d) and balance>0):
 				crypto+=(balance/close_price)*0.999 #close price, excluding 0.1% fee
 				balance=0 # after buying crypto
 				buying.append((date,close_price,crypto,balance)) #time,price, crypto, blance
