@@ -1,26 +1,29 @@
-"""Interface for querying historical data from specified exchange
+"""Interface for querying historical data from specified symbol
 """
 import ccxt
 import logging
 import re
 from datetime import datetime, timedelta
+import time
 class HistorialData(object):
 
 
-    def __init__(self, exchange_conf):
+    def __init__(self, symbol_conf):
         """Initializes HistoricalData class
 
         Args:
-            exchange_conf (dictionary taken from conf.yml): A dictionary coins/tokens with an associated market and a desired time frame to obtain data
+            symbol_conf (dictionary taken from conf.yml): A dictionary coins/tokens with an associated market and a desired time frame to obtain data
         """
         self.exchanges = dict() 
-        # Loads exchanges using ccxt.
-        for exchange in exchange_conf:
-         
+        # Loads symbols using ccxt.
+        for symbol in symbol_conf.keys():
+            exchange=symbol_conf[symbol]["exchange"]
             new_exchange = getattr(ccxt, exchange)({"enableRateLimit": True})
             
             # sets up api permissions for user if given
-            if new_exchange:
+            if exchange in self.exchanges:
+                pass
+            elif new_exchange:
                 self.exchanges[exchange] = new_exchange
                 logging.info("Loaded exchange: %s", exchange)
             else:
@@ -34,7 +37,7 @@ class HistorialData(object):
 
         Args:
             symbol (str): Contains the symbol to operate on i.e. BURST/BTC
-            exchange (str): Contains the exchange to fetch the historical data from.
+            exchange (str): Contains the exchnageto fetch the historical data from.
             time_unit (str): A string specifying the ccxt time unit i.e. 5m or 1d.
             limit (int, optional): Maximum number of candles to fetch data for.
 
@@ -70,12 +73,12 @@ class HistorialData(object):
         
 
         if not historical_data:
-            #logging.error("Can't fetch historical data for %s - %s", (symbol,exchange))
-            logging.info('No historical data provided returned by exchange.')
+            #logging.error("Can't fetch historical data for %s - %s", (symbol,symbol))
+            logging.info('No historical data provided returned by %s for symbol %s.',(exchange,symbol))
             
         # Sort by timestamp in ascending order
         historical_data.sort(key=lambda d: d[0])
 
-        # time.sleep(self.exchanges[exchange].rateLimit / 1000)
+        time.sleep(self.exchanges[exchange].rateLimit / 1000)
 
         return historical_data

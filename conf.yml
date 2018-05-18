@@ -1,39 +1,47 @@
 ---
-# Exchange and market pairs-------------------------------------------------
-#
-exchange:
-    kraken:
-        symbol: XMR/EUR
-        time_unit: 1d
-        candles: 365
-        wallet: 5000
-        strategies: [rsi_stochrsi_strategy]
-    # - EOS/EUR:
-    #     exhcnage: kraken
+#logging configuration
+logger:
+    Logging_level: DEBUG
+    stream: sys.stdout
 
-# Indicators' parameters
-
-indicators:
-    rsi:
-        period: 14
-        period_range: 60
-    macd:
-        period_macd_1: 12
-        period_macd_2: 26
-        #signal line
-        period_macd_signal: 9
-    stoch_rsi:
-        period: 17
-        period_range: 
-        fastk: 3
-        fastd: 3
-
-#logging level
-Logging_level: DEBUG
-
+#config telegram
 notifier:
     telegram:
         api: enter_api
         chat_id: enter_chatid
+
+# Exchange and market pairs
+symbol:
+    ETH/EUR:
+        exchange: kraken
+        time_unit: 1d
+        candles: 365
+        wallet: 5000
+        strategies: [macd_rsi_stochrsi_strategy]
+            
+# Indicators' parameters
+# Used in self-defined complex strategies to find the best strategy for each symbol
+indicators:
+    # macd: # for now, macd only uses default parameters
+    #     period_macd_1: 12
+    #     period_macd_2: 26
+    #     #signal line
+    #     period_macd_signal: 9
+    stoch_rsi: #period is also used for RSI
+        period: 17
+        period_range:  # from 3 to xx(30) candles
+        fast_k: 3
+        fast_d: 3
+    selling: #define selling criteria
+        rsi: [70,90,5] #from 80 to 100
+        fast_k: [70,90,5] #from to 100
+    buying: #define buying criteria
+        rsi: [5,30,5] # below 25
+        fast_k: [5,25,5] #below 20
+        confirmed_pullish: [10,20,5] #confirmed period until 14 candles
+        rsi_pullish: [50,60,5] #define pullish by RSI from 50
+        macdhist: [1,5,10] #% of closed price
+
+
 
 
