@@ -5,6 +5,8 @@ import logging
 import re
 from datetime import datetime, timedelta
 import time
+logger = logging.getLogger(__name__)
+
 class HistorialData(object):
 
 
@@ -25,9 +27,9 @@ class HistorialData(object):
                 pass
             elif new_exchange:
                 self.exchanges[exchange] = new_exchange
-                logging.info("Loaded exchange: %s", exchange)
+                logger.info("Loaded exchange: %s", exchange)
             else:
-                logging.error("Unable to load exchange %s", exchange)
+                logger.error("Unable to load exchange %s", exchange)
 
     def get_historical_data(self, symbol, exchange, time_unit="1d", limit=100):
         """Get historical OHLCV for a symbol pair
@@ -73,8 +75,8 @@ class HistorialData(object):
         
 
         if not historical_data:
-            #logging.error("Can't fetch historical data for %s - %s", (symbol,symbol))
-            logging.info('No historical data provided returned by %s for symbol %s.',(exchange,symbol))
+            #logger.error("Can't fetch historical data for %s - %s", (symbol,symbol))
+            logger.info('No historical data provided returned by %s for symbol %s.',(exchange,symbol))
             
         # Sort by timestamp in ascending order
         historical_data.sort(key=lambda d: d[0])

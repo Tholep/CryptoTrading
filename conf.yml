@@ -1,8 +1,39 @@
 ---
 #logging configuration
-logger:
-    Logging_level: DEBUG
-    stream: sys.stdout
+logging:
+    version: 1
+    disable_existing_loggers: False
+    formatters:
+        simple:
+            format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+    handlers:
+        console:
+            class: logging.StreamHandler
+            level: INFO
+            formatter: simple
+            stream: ext://sys.stdout
+
+        info_file_handler:
+            class: logging.handlers.RotatingFileHandler
+            level: INFO
+            formatter: simple
+            filename: "logs/info.log"
+            maxBytes: 10485760 # 10MB
+            backupCount: 20
+            encoding: utf8
+
+        error_file_handler:
+            class: logging.handlers.RotatingFileHandler
+            level: ERROR
+            formatter: simple
+            filename: "logs/errors.log"
+            maxBytes: 10485760 # 10MB
+            backupCount: 20
+            encoding: utf8
+    root:
+        level: INFO
+        handlers: [console, info_file_handler, error_file_handler]
 
 #config telegram
 notifier:
@@ -12,8 +43,110 @@ notifier:
 
 # Exchange and market pairs
 symbol:
+    BTC/EUR:
+        exchange: kraken
+        time_unit: 1d
+        candles: 365
+        wallet: 5000
+        strategies: [macd_rsi_stochrsi_strategy]
     ETH/EUR:
         exchange: kraken
+        time_unit: 1d
+        candles: 365
+        wallet: 5000
+        strategies: [macd_rsi_stochrsi_strategy]
+    XRP/EUR:
+        exchange: kraken
+        time_unit: 1d
+        candles: 365
+        wallet: 5000
+        strategies: [macd_rsi_stochrsi_strategy]
+    BCH/EUR:
+        exchange: kraken
+        time_unit: 1d
+        candles: 365
+        wallet: 5000
+        strategies: [macd_rsi_stochrsi_strategy]
+    EOS/EUR:
+        exchange: kraken
+        time_unit: 1d
+        candles: 365
+        wallet: 5000
+        strategies: [macd_rsi_stochrsi_strategy]
+    LTC/EUR:
+        exchange: kraken
+        time_unit: 1d
+        candles: 365
+        wallet: 5000
+        strategies: [macd_rsi_stochrsi_strategy]
+    ADA/ETH:
+        exchange: binance
+        time_unit: 1d
+        candles: 365
+        wallet: 5000
+        strategies: [macd_rsi_stochrsi_strategy]
+    MIOTA/EUR:
+        exchange: bitfinex2
+        time_unit: 1d
+        candles: 365
+        wallet: 5000
+        strategies: [macd_rsi_stochrsi_strategy]
+    TRX/ETH:
+        exchange: binance
+        time_unit: 1d
+        candles: 365
+        wallet: 5000
+        strategies: [macd_rsi_stochrsi_strategy]
+    NEO/USD:
+        exchange: bitfinex2
+        time_unit: 1d
+        candles: 365
+        wallet: 5000
+        strategies: [macd_rsi_stochrsi_strategy]
+    XMR/USD:
+        exchange: kraken
+        time_unit: 1d
+        candles: 365
+        wallet: 5000
+        strategies: [macd_rsi_stochrsi_strategy]
+    DASH/EUR:
+        exchange: kraken
+        time_unit: 1d
+        candles: 365
+        wallet: 5000
+        strategies: [macd_rsi_stochrsi_strategy]
+    XEM/ETH:
+        exchange: binance
+        time_unit: 1d
+        candles: 365
+        wallet: 5000
+        strategies: [macd_rsi_stochrsi_strategy]
+    VEN/ETH:
+        exchange: binance
+        time_unit: 1d
+        candles: 365
+        wallet: 5000
+        strategies: [macd_rsi_stochrsi_strategy]
+    ETC/EUR:
+        exchange: kraken
+        time_unit: 1d
+        candles: 365
+        wallet: 5000
+        strategies: [macd_rsi_stochrsi_strategy]
+    BCN/ETH:
+        exchange: binance
+        time_unit: 1d
+        candles: 365
+        wallet: 5000
+        strategies: [macd_rsi_stochrsi_strategy]
+    QTUM/ETH:
+        exchange: binance
+        time_unit: 1d
+        candles: 365
+        wallet: 5000
+        strategies: [macd_rsi_stochrsi_strategy]
+    ZEC/USD:
+        exchange: bitfinex2
         time_unit: 1d
         candles: 365
         wallet: 5000
@@ -33,14 +166,14 @@ indicators:
         fast_k: 3
         fast_d: 3
     selling: #define selling criteria
-        rsi: [70,90,5] #from 80 to 100
-        fast_k: [70,90,5] #from to 100
+        rsi: [65,90,5] #above
+        fast_k: [75,90,5] #above
     buying: #define buying criteria
-        rsi: [5,30,5] # below 25
-        fast_k: [5,25,5] #below 20
-        confirmed_pullish: [10,20,5] #confirmed period until 14 candles
-        rsi_pullish: [50,60,5] #define pullish by RSI from 50
-        macdhist: [1,5,10] #% of closed price
+        rsi: [20,40,5] # below
+        fast_k: [10,30,5] #below
+        confirmed_bullish: [10,20,5] #confirmed period until 14 candles
+        rsi_bullish: [50,60,5] #define bullish by RSI above
+        macdhist: [1,10,5] #% of closed price comparing to macdhist
 
 
 
