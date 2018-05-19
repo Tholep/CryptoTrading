@@ -125,14 +125,14 @@ class strategy(object):
 			macdhist=data.iloc[row]["macdhist"]
 			#macd_up= (data.iloc[row]["macdhist"] >=data.iloc[row-1]["macdhist"]) and (data.iloc[row]["macdhist"] >=data.iloc[row-2]["macdhist"]) and (data.iloc[row]["macdhist"] >=data.iloc[row-3]["macdhist"])
 			
-<<<<<<< HEAD
+
 			if (((rsi<30 or (rsi<70 and is_bearish_short and macdhist>=-10 )) and rsi>0) and (fast_k<20 and fast_k>0 and fast_k>fast_d) and balance>0):
 				crypto+=(balance/close_price)*0.999 #close price, excluding 0.1% fee
 				balance=0 # after buying crypto
 				buying.append((date,close_price,crypto,balance)) #time,price, crypto, blance
 				logging.info("Purchase at %s: %s at price %s - current balance: %s",str(date),str(crypto),str(close_price),str(balance))
 		
-=======
+
 			#buying decision
 			#
 			if (((rsi<buying_rsi or (rsi<70 and is_bullish  and macdhist>=float(buying_macdhist)/100*close_price*-1)) and rsi>0) and (fast_k<busying_stoch_rsi and fast_k>0 and fast_k>fast_d)):
@@ -144,7 +144,7 @@ class strategy(object):
 					logger.debug("Purchase at %s: %s at price %s - current balance: %s",str(date),str(crypto),str(close_price),str(balance))
 				if row==data_length-1:
 					recommendation="buy"
->>>>>>> chart
+
 			#Sell decision
 			if ((rsi>selling_rsi and fast_k>=selling_stoch_rsi)):
 				if crypto>0:
