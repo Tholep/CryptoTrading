@@ -3,6 +3,7 @@
 
 import telegram
 import logging
+logger = logging.getLogger(__name__)
 # from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 
 
@@ -70,7 +71,7 @@ class TelegramNotifier():
         try:
             for message_chunk in message_chunks:
                 self.bot.send_message(chat_id=self.chat_id, text=message_chunk)
-            logging.info("Bot has sent message(s) to the chat group")
+            logger.info("Bot has sent message(s) to the chat group")
         except Exception as e:
-            logging.error(e)
+            logger.error(e)
         
