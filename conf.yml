@@ -1,180 +1,196 @@
----
-#logging configuration
-logging:
-    version: 1
-    disable_existing_loggers: False
-    formatters:
-        simple:
-            format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-
-    handlers:
-        console:
-            class: logging.StreamHandler
-            level: INFO
-            formatter: simple
-            stream: ext://sys.stdout
-
-        info_file_handler:
-            class: logging.handlers.RotatingFileHandler
-            level: INFO
-            formatter: simple
-            filename: "logs/info.log"
-            maxBytes: 10485760 # 10MB
-            backupCount: 20
-            encoding: utf8
-
-        error_file_handler:
-            class: logging.handlers.RotatingFileHandler
-            level: ERROR
-            formatter: simple
-            filename: "logs/errors.log"
-            maxBytes: 10485760 # 10MB
-            backupCount: 20
-            encoding: utf8
-    root:
-        level: INFO
-        handlers: [console, info_file_handler, error_file_handler]
-
-#config telegram
-notifier:
-    telegram:
-        api: enter_api
-        chat_id: enter_chatid
-
-# Exchange and market pairs
-symbol:
-    BTC/EUR:
-        exchange: kraken
-        time_unit: 1d
-        candles: 365
-        wallet: 5000
-        strategies: [macd_rsi_stochrsi_strategy]
-    ETH/EUR:
-        exchange: kraken
-        time_unit: 1d
-        candles: 365
-        wallet: 5000
-        strategies: [macd_rsi_stochrsi_strategy]
-    XRP/EUR:
-        exchange: kraken
-        time_unit: 1d
-        candles: 365
-        wallet: 5000
-        strategies: [macd_rsi_stochrsi_strategy]
-    BCH/EUR:
-        exchange: kraken
-        time_unit: 1d
-        candles: 365
-        wallet: 5000
-        strategies: [macd_rsi_stochrsi_strategy]
-    EOS/EUR:
-        exchange: kraken
-        time_unit: 1d
-        candles: 365
-        wallet: 5000
-        strategies: [macd_rsi_stochrsi_strategy]
-    LTC/EUR:
-        exchange: kraken
-        time_unit: 1d
-        candles: 365
-        wallet: 5000
-        strategies: [macd_rsi_stochrsi_strategy]
-    ADA/ETH:
-        exchange: binance
-        time_unit: 1d
-        candles: 365
-        wallet: 5000
-        strategies: [macd_rsi_stochrsi_strategy]
-    MIOTA/EUR:
-        exchange: bitfinex2
-        time_unit: 1d
-        candles: 365
-        wallet: 5000
-        strategies: [macd_rsi_stochrsi_strategy]
-    TRX/ETH:
-        exchange: binance
-        time_unit: 1d
-        candles: 365
-        wallet: 5000
-        strategies: [macd_rsi_stochrsi_strategy]
-    NEO/USD:
-        exchange: bitfinex2
-        time_unit: 1d
-        candles: 365
-        wallet: 5000
-        strategies: [macd_rsi_stochrsi_strategy]
-    XMR/USD:
-        exchange: kraken
-        time_unit: 1d
-        candles: 365
-        wallet: 5000
-        strategies: [macd_rsi_stochrsi_strategy]
-    DASH/EUR:
-        exchange: kraken
-        time_unit: 1d
-        candles: 365
-        wallet: 5000
-        strategies: [macd_rsi_stochrsi_strategy]
-    XEM/ETH:
-        exchange: binance
-        time_unit: 1d
-        candles: 365
-        wallet: 5000
-        strategies: [macd_rsi_stochrsi_strategy]
-    VEN/ETH:
-        exchange: binance
-        time_unit: 1d
-        candles: 365
-        wallet: 5000
-        strategies: [macd_rsi_stochrsi_strategy]
-    ETC/EUR:
-        exchange: kraken
-        time_unit: 1d
-        candles: 365
-        wallet: 5000
-        strategies: [macd_rsi_stochrsi_strategy]
-    BCN/ETH:
-        exchange: binance
-        time_unit: 1d
-        candles: 365
-        wallet: 5000
-        strategies: [macd_rsi_stochrsi_strategy]
-    QTUM/ETH:
-        exchange: binance
-        time_unit: 1d
-        candles: 365
-        wallet: 5000
-        strategies: [macd_rsi_stochrsi_strategy]
-    ZEC/USD:
-        exchange: bitfinex2
-        time_unit: 1d
-        candles: 365
-        wallet: 5000
-        strategies: [macd_rsi_stochrsi_strategy]
-            
-# Indicators' parameters
-# Used in self-defined complex strategies to find the best strategy for each symbol
 indicators:
-    # macd: # for now, macd only uses default parameters
-    #     period_macd_1: 12
-    #     period_macd_2: 26
-    #     #signal line
-    #     period_macd_signal: 9
-    stoch_rsi: #period is also used for RSI
-        period: 17
-        period_range:  # from 3 to xx(30) candles
-        fast_k: 3
-        fast_d: 3
-    selling: #define selling criteria
-        rsi: [65,90,5] #above
-        fast_k: [75,90,5] #above
-    buying: #define buying criteria
-        rsi: [20,40,5] # below
-        fast_k: [10,30,5] #below
-        confirmed_bullish: [10,20,5] #confirmed period until 14 candles
-        rsi_bullish: [50,60,5] #define bullish by RSI above
-        macdhist: [1,10,5] #% of closed price comparing to macdhist
-
-
-
-
+  buying:
+    confirmed_bullish:
+    - 5
+    - 20
+    - 5
+    fast_k:
+    - 10
+    - 30
+    - 5
+    macdhist:
+    - 1
+    - 10
+    - 5
+    rsi:
+    - 20
+    - 40
+    - 5
+    rsi_bullish:
+    - 50
+    - 60
+    - 5
+  selling:
+    fast_k:
+    - 70
+    - 90
+    - 5
+    rsi:
+    - 70
+    - 90
+    - 5
+  stoch_rsi:
+    fast_d: 3
+    fast_k: 3
+    period:
+    - 14
+    - 14
+    - 1
+logging:
+  disable_existing_loggers: false
+  formatters:
+    simple:
+      format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  handlers:
+    console:
+      class: logging.StreamHandler
+      formatter: simple
+      level: INFO
+      stream: ext://sys.stdout
+    error_file_handler:
+      backupCount: 20
+      class: logging.handlers.RotatingFileHandler
+      encoding: utf8
+      filename: logs/errors.log
+      formatter: simple
+      level: ERROR
+      maxBytes: 10485760
+    info_file_handler:
+      backupCount: 20
+      class: logging.handlers.RotatingFileHandler
+      encoding: utf8
+      filename: logs/info.log
+      formatter: simple
+      level: INFO
+      maxBytes: 10485760
+  root:
+    handlers:
+    - console
+    - info_file_handler
+    - error_file_handler
+    level: INFO
+  version: 1
+notifier:
+  telegram:
+    api: 509454533:AAHnp8d8thCK21XPZtrHEkgPa4cUnU89oxw
+    chat_id: -300584893
+symbol:
+  ADA/ETH:
+    candles: 365
+    exchange: binance
+    strategies:
+    - macd_rsi_stochrsi_strategy_finder
+    time_unit: 1d
+    wallet: 5000
+  BCH/EUR:
+    candles: 365
+    exchange: kraken
+    strategies:
+    - macd_rsi_stochrsi_strategy_finder
+    time_unit: 1d
+    wallet: 5000
+  BCN/ETH:
+    candles: 365
+    exchange: binance
+    strategies:
+    - macd_rsi_stochrsi_strategy_finder
+    time_unit: 1d
+    wallet: 5000
+  DASH/EUR:
+    candles: 365
+    exchange: kraken
+    strategies:
+    - macd_rsi_stochrsi_strategy_finder
+    time_unit: 1d
+    wallet: 5000
+  EOS/EUR:
+    candles: 365
+    exchange: kraken
+    strategies:
+    - macd_rsi_stochrsi_strategy_finder
+    time_unit: 1d
+    wallet: 5000
+  ETC/EUR:
+    candles: 365
+    exchange: kraken
+    strategies:
+    - macd_rsi_stochrsi_strategy_finder
+    time_unit: 1d
+    wallet: 5000
+  ETH/EUR:
+    candles: 365
+    exchange: kraken
+    strategies:
+    - macd_rsi_stochrsi_strategy_finder
+    time_unit: 1d
+    wallet: 5000
+  IOTA/EUR:
+    candles: 365
+    exchange: bitfinex2
+    strategies:
+    - macd_rsi_stochrsi_strategy_finder
+    time_unit: 1d
+    wallet: 5000
+  LTC/EUR:
+    candles: 365
+    exchange: kraken
+    strategies:
+    - macd_rsi_stochrsi_strategy_finder
+    time_unit: 1d
+    wallet: 5000
+  NEO/USD:
+    candles: 365
+    exchange: bitfinex2
+    strategies:
+    - macd_rsi_stochrsi_strategy_finder
+    time_unit: 1d
+    wallet: 5000
+  QTUM/ETH:
+    candles: 365
+    exchange: binance
+    strategies:
+    - macd_rsi_stochrsi_strategy_finder
+    time_unit: 1d
+    wallet: 5000
+  TRX/ETH:
+    candles: 365
+    exchange: binance
+    strategies:
+    - macd_rsi_stochrsi_strategy_finder
+    time_unit: 1d
+    wallet: 5000
+  VEN/ETH:
+    candles: 365
+    exchange: binance
+    strategies:
+    - macd_rsi_stochrsi_strategy_finder
+    time_unit: 1d
+    wallet: 5000
+  XEM/ETH:
+    candles: 365
+    exchange: binance
+    strategies:
+    - macd_rsi_stochrsi_strategy_finder
+    time_unit: 1d
+    wallet: 5000
+  XMR/USD:
+    candles: 365
+    exchange: kraken
+    strategies:
+    - macd_rsi_stochrsi_strategy_finder
+    time_unit: 1d
+    wallet: 5000
+  XRP/EUR:
+    candles: 365
+    exchange: kraken
+    strategies:
+    - macd_rsi_stochrsi_strategy_finder
+    time_unit: 1d
+    wallet: 5000
+  ZEC/USD:
+    candles: 365
+    exchange: bitfinex2
+    strategies:
+    - macd_rsi_stochrsi_strategy_finder
+    time_unit: 1d
+    wallet: 5000

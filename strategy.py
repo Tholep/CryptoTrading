@@ -2,6 +2,8 @@ import pandas
 import logging
 import time
 from analyzer import indicators
+import datetime
+import sys
 logger = logging.getLogger(__name__)
 class strategy(object):
 	"""docstring for strategy"""
@@ -19,7 +21,6 @@ class strategy(object):
 		self.indicators_conf=indicators_conf
 		self.fast_k=self.indicators_conf["stoch_rsi"]["fast_k"]
 		self.fast_d=self.indicators_conf["stoch_rsi"]["fast_d"]
-		self.rsi_period_range=self.indicators_conf["stoch_rsi"]["period_range"]
 		self.rsi_period=self.indicators_conf["stoch_rsi"]["period"]
 		self.selling_rsi=self.indicators_conf["selling"]["rsi"]
 		self.selling_stoch_rsi=self.indicators_conf["selling"]["fast_k"]
@@ -30,10 +31,9 @@ class strategy(object):
 		self.buying_macdhist=self.indicators_conf["buying"]["macdhist"]
 
 		#calculate estimated running time for this search. Each round takes roughly about 0.4s
-		if self.rsi_period_range:
-			time_period_range=(self.rsi_period_range[1]-self.rsi_period_range[0]) if (self.rsi_period_range[1]-self.rsi_period_range[0])>0  else 1
-		else:
-			time_period_range=1
+		
+		time_period=(self.rsi_period[1]-self.rsi_period[0])/self.rsi_period[2] +1 if (self.rsi_period[1]-self.rsi_period[0])>0  else 1
+	
 		time_selling_rsi=(self.selling_rsi[1]-self.selling_rsi[0])/self.selling_rsi[2] +1 if (self.selling_rsi[1]-self.selling_rsi[0])>0 else 1
 
 		time_selling_stoch_rsi=(self.selling_stoch_rsi[1]-self.selling_stoch_rsi[0])/self.selling_stoch_rsi[2] +1 if (self.selling_stoch_rsi[1]-self.selling_stoch_rsi[0])>0 else 1
@@ -49,44 +49,78 @@ class strategy(object):
 		time_buying_macdhist=(self.buying_macdhist[1]-self.buying_macdhist[0])/self.buying_macdhist[2] +1 if (self.buying_macdhist[1]-self.buying_macdhist[0])>0 else 1
 
 		#estimate running time in seconds
-		self.estimated_run= time_period_range*time_selling_rsi*time_selling_stoch_rsi*time_buying_rsi*time_buying_stoch_rsi*time_buying_confirmed_bullish*time_buying_rsi_bullish*time_buying_macdhist
+		self.estimated_run= time_period*time_selling_rsi*time_selling_stoch_rsi*time_buying_rsi*time_buying_stoch_rsi*time_buying_confirmed_bullish*time_buying_rsi_bullish*time_buying_macdhist
 		logger.info("Estimated number of brute forces are %s, in about %s minutes",str(self.estimated_run),str(self.estimated_run*0.4/60))
+
+		#determine whether to bruteforce parameters
+		# if (datetime.date.today().isoweekday()==5) or (not "indicators" in self.symbol_conf):
+		# 	self.bruteforce=True
+		# else
+		# 	self.bruteforce=False
+
 
 	def strategy_launcher(self):
 		results={}
 		for st in self.symbol_conf["strategies"]:
 			logger.info("Start strategy %s",st)
-			results[st]=getattr(self,st)()
-			# try:
-			# 	results[st]=getattr(self,st)()
-			# except:
-			# 	logger.error("Strategy: %s does not exist",st)
+			try:
+				results[st]=getattr(self,st)()
+			except:
+				logger.error("Strategy: %s does not exist",st,exc_info=True)
 		return results
-	def macd_rsi_stochrsi_strategy(self):
+	def macd_rsi_stochrsi_strategy_finder(self):
 		"""Using rsi and stochrsi for selling and buying decision
 		Results: return a tuple of (balance (number), buying (list),selling (list))
 		"""
 		results=[]
+		#Run bruteforce every Friday or the symbol is not tuned yet
+		try:
+			if (datetime.date.today().isoweekday()==5) or (not "indicators" in self.symbol_conf):
+				
+				for period in range (self.rsi_period[0],self.rsi_period[1]+1,self.rsi_period[2]):
+					rsi_stoch_rsi=self.technical_data.stochastic_rsi_cal(self.data_standard,period,self.fast_k,self.fast_d)
+					macd=self.technical_data.macd_cal(self.data_standard)
+					analytical_data=pandas.concat([self.data_standard,rsi_stoch_rsi,macd],axis=1)
+					analytical_data.dropna(how='all', inplace=True)
+					results.append(self.rsi_stochrsi_strategy_bruteforce(period,self.fast_k,self.fast_d,analytical_data))
+				# else:
+				# 	rsi_stoch_rsi=self.technical_data.stochastic_rsi_cal(self.data_standard,self.rsi_period,self.fast_k,self.fast_d)
+				# 	macd=self.technical_data.macd_cal(self.data_standard)
+				# 	analytical_data=pandas.concat([self.data_standard,rsi_stoch_rsi,macd],axis=1)
+				# 	analytical_data.dropna(how='all', inplace=True)
+				# 	results.append(self.rsi_stochrsi_strategy_bruteforce(self.rsi_period,self.fast_k,self.fast_d,analytical_data))
+				return results
 
-		if self.rsi_period_range:
-			for period in range (self.rsi_period_range[0],self.rsi_period_range[1]+1):
-				rsi_stoch_rsi=self.technical_data.stochastic_rsi_cal(self.data_standard,period,self.fast_k,self.fast_d)
+			else:
+				#runing the tunned parameters
+				rsi_stoch_rsi=self.technical_data.stochastic_rsi_cal(self.data_standard,self.symbol_conf["indicators"]["stoch_rsi"]["period"],self.symbol_conf["indicators"]["stoch_rsi"]["fast_k"],self.symbol_conf["indicators"]["stoch_rsi"]["fast_d"])
 				macd=self.technical_data.macd_cal(self.data_standard)
 				analytical_data=pandas.concat([self.data_standard,rsi_stoch_rsi,macd],axis=1)
 				analytical_data.dropna(how='all', inplace=True)
-				results.append(self.rsi_stochrsi_strategy_bruteforce(period,self.fast_k,self.fast_d,analytical_data))
-		else:
-			rsi_stoch_rsi=self.technical_data.stochastic_rsi_cal(self.data_standard,self.rsi_period,self.fast_k,self.fast_d)
-			macd=self.technical_data.macd_cal(self.data_standard)
-			analytical_data=pandas.concat([self.data_standard,rsi_stoch_rsi,macd],axis=1)
-			analytical_data.dropna(how='all', inplace=True)
-			results.append(self.rsi_stochrsi_strategy_bruteforce(self.rsi_period,self.fast_k,self.fast_d,analytical_data))
+				results.append(self.rsi_stochrsi_strategy_tuned_parameter(self.symbol_conf["indicators"]["stoch_rsi"]["period"],self.symbol_conf["indicators"]["stoch_rsi"]["fast_k"],self.symbol_conf["indicators"]["stoch_rsi"]["fast_d"],analytical_data))
+				return results
+		except Exception,e:
+			logger.error("Error when runing a strategy. Current symbol configuration %s",self.symbol_conf,exc_info=True)
+			sys.exit(1)
+	def rsi_stochrsi_strategy_tuned_parameter(self,period,fast_k_period,fast_d_period,data):
+		"""Applied tuned parameters for the strategy of the current symbol
+		"""
+		#return results in an array in order to be consistent with the bruteforce method
+		results=[]
+		logger.info("Running the strategy with tunned parameters")
+		i_selling_rsi=self.symbol_conf["indicators"]["selling"]["rsi"]
+		i_selling_stoch_rsi=self.symbol_conf["indicators"]["selling"]["fast_k"]
+		i_buying_rsi=self.symbol_conf["indicators"]["buying"]["rsi"]
+		i_buying_stoch_rsi=self.symbol_conf["indicators"]["buying"]["fast_k"]
+		i_buying_confirmed_bullish=self.symbol_conf["indicators"]["buying"]["confirmed_bullish"]
+		i_buying_rsi_bullish=self.symbol_conf["indicators"]["buying"]["rsi_bullish"]
+		i_buying_macdhist=self.symbol_conf["indicators"]["buying"]["macdhist"]
+		results.append(self.rsi_stochrsi_strategy_trading(period,fast_k_period,fast_d_period,data,i_selling_rsi,i_selling_stoch_rsi,i_buying_rsi,i_buying_stoch_rsi,i_buying_confirmed_bullish,i_buying_rsi_bullish,i_buying_macdhist))
 		return results
-
 	def rsi_stochrsi_strategy_bruteforce(self,period,fast_k_period,fast_d_period,data):
 	
 		results=[]
-		
+		logger.info("Starting bruteforce parameters...")
 		#starting the bruteforce to find best combination
 		for i_selling_rsi in range(self.selling_rsi[0],self.selling_rsi[1]+1,self.selling_rsi[2]):
 			for i_selling_stoch_rsi in range(self.selling_stoch_rsi[0],self.selling_stoch_rsi[1]+1,self.selling_stoch_rsi[2]):
@@ -168,7 +202,7 @@ class strategy(object):
 			True if bullish, False if not
 		"""
 		data["rsi_bullish"]=data["rsi"]>defined_bullish
-		data["is_bullish"]=data["rsi_bullish"].rolling(confirmed_bullish).sum()==confirmed_bullish
+		data["is_bullish"]=data["rsi_bullish"].rolling(int(confirmed_bullish)).sum()==confirmed_bullish
 		#data["is_bullish_long"]=data["rsi_bullish"].rolling(candles_long).sum()==candles_long
 		return data
 
