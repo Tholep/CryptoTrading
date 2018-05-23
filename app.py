@@ -130,10 +130,10 @@ def main():
 					symbol_conf[symbol]["indicators"]=indicators
 			else:
 				logger.info("There is no profitable strategy found for this symbol")
-	#Automatically update configuration file
-	conf["symbol"]=symbol_conf
-	with open('conf.yml', 'w') as outfile:
-		yaml.dump(conf, outfile, default_flow_style=False)
+		#Automatically update configuration file
+		conf["symbol"]=symbol_conf
+		with open('conf.yml', 'w') as outfile:
+			yaml.dump(conf, outfile, default_flow_style=False)
 
 
 					
@@ -141,4 +141,5 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        sys.exit(0)
+		logger.info("Terminating process...")
+		sys.exit(0)

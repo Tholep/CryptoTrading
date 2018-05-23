@@ -118,7 +118,7 @@ class strategy(object):
 		results.append(self.rsi_stochrsi_strategy_trading(period,fast_k_period,fast_d_period,data,i_selling_rsi,i_selling_stoch_rsi,i_buying_rsi,i_buying_stoch_rsi,i_buying_confirmed_bullish,i_buying_rsi_bullish,i_buying_macdhist))
 		return results
 	def rsi_stochrsi_strategy_bruteforce(self,period,fast_k_period,fast_d_period,data):
-	
+		start_time=time.time()
 		results=[]
 		logger.info("Starting bruteforce parameters...")
 		#starting the bruteforce to find best combination
@@ -132,6 +132,7 @@ class strategy(object):
 									result=self.rsi_stochrsi_strategy_trading(period,fast_k_period,fast_d_period,data,i_selling_rsi,i_selling_stoch_rsi,i_buying_rsi,i_buying_stoch_rsi,i_buying_confirmed_bullish,i_buying_rsi_bullish,i_buying_macdhist)
 									if result:
 										results.append(result)
+		logger.info("Tottal bruteforce time is %s minutes",str((start_time - time.time())/60))
 		return results
 
 	def rsi_stochrsi_strategy_trading(self,period,fast_k_period,fast_d_period,data,selling_rsi,selling_stoch_rsi,buying_rsi,busying_stoch_rsi,buying_confirmed_bullish,buying_rsi_bullish,buying_macdhist):
@@ -143,7 +144,7 @@ class strategy(object):
 		recorded_transaction=[]
 		data=self.is_bullish(buying_confirmed_bullish,buying_rsi_bullish,data)
 		#provide recommendation according to the defined strategy
-		recommendation=""
+		recommendation= "no"
 		
 		for row in range(data_length):		
 			"""Buy decision
