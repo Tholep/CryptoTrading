@@ -73,8 +73,13 @@ def main():
 				logger.info("Transaction details:")
 				for ts in frame.iloc[-1]["recorded_transaction"]:
 					logger.info("%s",ts)
-				if frame.iloc[-1]["recommendation"]:
-					telegram.notify(message)
+				try:
+					if frame.iloc[-1]["recommendation"]!="no":
+						telegram.notify(message)
+					else:
+						telegram.notify("No recommendation for %s",symbol)
+				except:
+					logger.error("Telegram is having error and cannot send message(s)")
 				#check configuration and update with new parameters if having
 				if "indicators" in symbol_conf[symbol]:
 					# stochastic RSI parameters
