@@ -96,13 +96,6 @@ symbol:
     - macd_rsi_stochrsi_strategy_finder
     time_unit: 1d
     wallet: 5000
-  BCN/ETH:
-    candles: 365
-    exchange: binance
-    strategies:
-    - macd_rsi_stochrsi_strategy_finder
-    time_unit: 1d
-    wallet: 5000
   DASH/EUR:
     candles: 365
     exchange: kraken
@@ -187,13 +180,6 @@ symbol:
     - macd_rsi_stochrsi_strategy_finder
     time_unit: 1d
     wallet: 5000
-  IOTA/EUR:
-    candles: 365
-    exchange: bitfinex2
-    strategies:
-    - macd_rsi_stochrsi_strategy_finder
-    time_unit: 1d
-    wallet: 5000
   LTC/EUR:
     candles: 365
     exchange: kraken
@@ -274,13 +260,6 @@ symbol:
         fast_d: 3
         fast_k: 3
         period: 17
-    strategies:
-    - macd_rsi_stochrsi_strategy_finder
-    time_unit: 1d
-    wallet: 5000
-  XEM/ETH:
-    candles: 365
-    exchange: binance
     strategies:
     - macd_rsi_stochrsi_strategy_finder
     time_unit: 1d

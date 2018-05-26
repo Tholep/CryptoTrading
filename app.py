@@ -32,8 +32,9 @@ def main():
 
 	try:
 		telegram=TelegramNotifier(conf["notifier"]["telegram"]["api"],conf["notifier"]["telegram"]["chat_id"])
+		logger.info("Loaded telegram")
 	except Exception as e:
-		logger.error("Cannot load telegram object")
+		logger.error("Cannot load telegram object",exc_info=True)
 	
 
 	symbol_conf=conf["symbol"]
@@ -56,12 +57,13 @@ def main():
 		logger.info("bruteforce strategies for %s",symbol)
 		tatics=strategy(data,symbol_conf[symbol],conf["indicators"])
 		results=tatics.strategy_launcher()
+		#logger.info(results)
 		#temporary test of results
 		for st in symbol_conf[symbol]["strategies"]:
 			
 			trading_result=results[st][0]
 			#only process if there are strategies that are profitable
-			if len(trading_result)>0:
+			if trading_result[0]!=None: #if None, only 1 value
 			#for trading_result in strategy_result:
 				message=symbol + ":" + st +"/n"
 				frame=df(trading_result)
@@ -73,13 +75,12 @@ def main():
 				logger.info("Transaction details:")
 				for ts in frame.iloc[-1]["recorded_transaction"]:
 					logger.info("%s",ts)
+					message+=str(ts)
 				try:
 					if frame.iloc[-1]["recommendation"]!="no":
 						telegram.notify(message)
-					else:
-						telegram.notify("No recommendation for %s",symbol)
-				except:
-					logger.error("Telegram is having error and cannot send message(s)")
+				except Exception as e:
+					logger.error("Telegram is having error and cannot send message(s)",exc_info=True)
 				#check configuration and update with new parameters if having
 				if "indicators" in symbol_conf[symbol]:
 					# stochastic RSI parameters

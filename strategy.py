@@ -65,6 +65,7 @@ class strategy(object):
 			logger.info("Start strategy %s",st)
 			try:
 				results[st]=getattr(self,st)()
+				
 			except:
 				logger.error("Strategy: %s does not exist",st,exc_info=True)
 		return results
@@ -75,8 +76,8 @@ class strategy(object):
 		results=[]
 		#Run bruteforce every Friday or the symbol is not tuned yet
 		try:
-			if (datetime.date.today().isoweekday()==5) or (not "indicators" in self.symbol_conf):
-				
+			#Monday is 0 and Sunday is 6
+			if (datetime.datetime.today().weekday()==3) or (not "indicators" in self.symbol_conf):
 				for period in range (self.rsi_period[0],self.rsi_period[1]+1,self.rsi_period[2]):
 					rsi_stoch_rsi=self.technical_data.stochastic_rsi_cal(self.data_standard,period,self.fast_k,self.fast_d)
 					macd=self.technical_data.macd_cal(self.data_standard)
@@ -132,6 +133,9 @@ class strategy(object):
 									result=self.rsi_stochrsi_strategy_trading(period,fast_k_period,fast_d_period,data,i_selling_rsi,i_selling_stoch_rsi,i_buying_rsi,i_buying_stoch_rsi,i_buying_confirmed_bullish,i_buying_rsi_bullish,i_buying_macdhist)
 									if result:
 										results.append(result)
+		# in case of no profitable strategy, add None to results
+		if len(results)==0:
+			results.append(None)
 		logger.info("Tottal bruteforce time is %s minutes",str((start_time - time.time())/60))
 		return results
 
