@@ -75,7 +75,7 @@ def main():
 				logger.info("Transaction details:")
 				for ts in frame.iloc[-1]["recorded_transaction"]:
 					logger.info("%s",ts)
-					message+=str(ts)
+					#message+=str(ts)
 				try:
 					if frame.iloc[-1]["recommendation"]!="no":
 						telegram.notify(message)
