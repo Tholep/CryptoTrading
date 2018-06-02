@@ -177,23 +177,22 @@ class strategy(object):
 			is_bullish=data.iloc[row]["is_bullish"]
 			macdhist=data.iloc[row]["macdhist"]
 			#buying decision
-			#
-			if ((((rsi<buying_rsi and is_bullish==False) or \
-				(rsi<buying_rsi_bullish and is_bullish  and macdhist>=float(buying_macdhist)/100*close_price*-1)) \
-				and rsi>0) and (fast_k<buying_stoch_rsi and fast_k>0 and fast_k>fast_d)):
+			#for bearish
+			if (fast_k>0 and rsi>0 and ((rsi<buying_rsi and is_bullish==False) or (rsi<buying_rsi_bullish and is_bullish)) and \
+				fast_k<buying_stoch_rsi and fast_k>fast_d and macdhist>=(float(buying_macdhist)/100)*close_price*-1):
 				if balance>0:
 					crypto+=(balance/close_price)*0.99 #close price, excluding 0.1% fee
 					balance=0 # after buying crypto
 					#time,price, crypto, balance
 					recorded_transaction.append(("buying",date,close_price,crypto,balance)) 
-					logger.info("Purchase at %s: %s at price %s - current balance: %s",str(date),str(crypto),str(close_price),str(balance))
+					logger.debug("Purchase at %s: %s at price %s - current balance: %s",str(date),str(crypto),str(close_price),str(balance))
 				if row==data_length-1:
 					recommendation="buy"
 			#Sell decision
 			if (((is_bullish==False and rsi>selling_rsi) or (is_bullish and rsi>selling_rsi_bullish)) and fast_k>=selling_stoch_rsi):
 				if crypto>0:
 					balance+=(crypto*close_price)*0.99 #close price, excluding 0.1% fee
-					logger.info("Sell at %s: %s at price %s - current balance: %s",str(date),str(crypto),str(close_price),str(balance))
+					logger.debug("Sell at %s: %s at price %s - current balance: %s",str(date),str(crypto),str(close_price),str(balance))
 					crypto=0
 					#time,price, crypto, balance
 					recorded_transaction.append(("selling",date,close_price,crypto,balance)) 
