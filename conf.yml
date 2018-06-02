@@ -2,7 +2,7 @@ indicators:
   buying:
     confirmed_bullish:
     - 5
-    - 15
+    - 10
     - 5
     fast_k:
     - 10
@@ -10,7 +10,7 @@ indicators:
     - 5
     macdhist:
     - 1
-    - 10
+    - 7
     - 3
     rsi:
     - 20
@@ -20,12 +20,20 @@ indicators:
     - 40
     - 60
     - 5
+    rsi_midpoint:
+    - 40
+    - 60
+    - 10
   selling:
     fast_k:
     - 70
     - 90
     - 5
     rsi:
+    - 50
+    - 70
+    - 5
+    rsi_bullish:
     - 70
     - 90
     - 5
@@ -72,253 +80,24 @@ logging:
   version: 1
 notifier:
   telegram:
-    api: 509454533:AAHnp8d8thCK21XPZtrHEkgPa4cUnU89oxw
-    chat_id: -300584893
+    api: null
+    chat_id: null
 symbol:
-  BCH/EUR:
-    candles: 365
-    exchange: kraken
-    indicators:
-      buying:
-        confirmed_bullish: 10
-        fast_k: 30
-        macdhist: 1
-        rsi: 35
-        rsi_bullish: 55
-      selling:
-        fast_k: 75
-        rsi: 80
-      stoch_rsi:
-        fast_d: 3
-        fast_k: 3
-        period: 17
-    strategies:
-    - macd_rsi_stochrsi_strategy_finder
-    time_unit: 1d
-    wallet: 5000
-  DASH/EUR:
-    candles: 365
-    exchange: kraken
-    indicators:
-      buying:
-        confirmed_bullish: 15
-        fast_k: 15
-        macdhist: 7
-        rsi: 25
-        rsi_bullish: 55
-      selling:
-        fast_k: 80
-        rsi: 85
-      stoch_rsi:
-        fast_d: 3
-        fast_k: 3
-        period: 17
-    strategies:
-    - macd_rsi_stochrsi_strategy_finder
-    time_unit: 1d
-    wallet: 5000
-  EOS/EUR:
-    candles: 365
-    exchange: kraken
-    indicators:
-      buying:
-        confirmed_bullish: 15
-        fast_k: 15
-        macdhist: 10
-        rsi: 20
-        rsi_bullish: 40
-      selling:
-        fast_k: 75
-        rsi: 85
-      stoch_rsi:
-        fast_d: 3
-        fast_k: 3
-        period: 17
-    strategies:
-    - macd_rsi_stochrsi_strategy_finder
-    time_unit: 1d
-    wallet: 5000
-  ETC/EUR:
-    candles: 365
-    exchange: kraken
-    indicators:
-      buying:
-        confirmed_bullish: 10
-        fast_k: 25
-        macdhist: 1
-        rsi: 40
-        rsi_bullish: 40
-      selling:
-        fast_k: 90
-        rsi: 70
-      stoch_rsi:
-        fast_d: 3
-        fast_k: 3
-        period: 17
-    strategies:
-    - macd_rsi_stochrsi_strategy_finder
-    time_unit: 1d
-    wallet: 5000
   ETH/EUR:
     candles: 365
     exchange: kraken
     indicators:
       buying:
-        confirmed_bullish: 5
+        confirmed_bullish: 10
         fast_k: 30
         macdhist: 7
         rsi: 40
-        rsi_bullish: 55
+        rsi_bullish: 60
+        rsi_midpoint: 55
       selling:
         fast_k: 70
-        rsi: 80
-      stoch_rsi:
-        fast_d: 3
-        fast_k: 3
-        period: 17
-    strategies:
-    - macd_rsi_stochrsi_strategy_finder
-    time_unit: 1d
-    wallet: 5000
-  LTC/EUR:
-    candles: 365
-    exchange: kraken
-    indicators:
-      buying:
-        confirmed_bullish: 15
-        fast_k: 20
-        macdhist: 4
-        rsi: 35
-        rsi_bullish: 45
-      selling:
-        fast_k: 70
-        rsi: 80
-      stoch_rsi:
-        fast_d: 3
-        fast_k: 3
-        period: 17
-    strategies:
-    - macd_rsi_stochrsi_strategy_finder
-    time_unit: 1d
-    wallet: 5000
-  QTUM/ETH:
-    candles: 365
-    exchange: binance
-    indicators:
-      buying:
-        confirmed_bullish: 5
-        fast_k: 10
-        macdhist: 4
-        rsi: 35
-        rsi_bullish: 45
-      selling:
-        fast_k: 70
-        rsi: 80
-      stoch_rsi:
-        fast_d: 3
-        fast_k: 3
-        period: 17
-    strategies:
-    - macd_rsi_stochrsi_strategy_finder
-    time_unit: 1d
-    wallet: 5000
-  TRX/ETH:
-    candles: 365
-    exchange: binance
-    indicators:
-      buying:
-        confirmed_bullish: 5
-        fast_k: 10
-        macdhist: 4
-        rsi: 40
-        rsi_bullish: 40
-      selling:
-        fast_k: 80
         rsi: 70
-      stoch_rsi:
-        fast_d: 3
-        fast_k: 3
-        period: 17
-    strategies:
-    - macd_rsi_stochrsi_strategy_finder
-    time_unit: 1d
-    wallet: 5000
-  VEN/ETH:
-    candles: 365
-    exchange: binance
-    indicators:
-      buying:
-        confirmed_bullish: 10
-        fast_k: 15
-        macdhist: 4
-        rsi: 25
-        rsi_bullish: 45
-      selling:
-        fast_k: 80
-        rsi: 75
-      stoch_rsi:
-        fast_d: 3
-        fast_k: 3
-        period: 17
-    strategies:
-    - macd_rsi_stochrsi_strategy_finder
-    time_unit: 1d
-    wallet: 5000
-  XMR/USD:
-    candles: 365
-    exchange: kraken
-    indicators:
-      buying:
-        confirmed_bullish: 15
-        fast_k: 30
-        macdhist: 7
-        rsi: 40
-        rsi_bullish: 40
-      selling:
-        fast_k: 85
-        rsi: 85
-      stoch_rsi:
-        fast_d: 3
-        fast_k: 3
-        period: 17
-    strategies:
-    - macd_rsi_stochrsi_strategy_finder
-    time_unit: 1d
-    wallet: 5000
-  XRP/EUR:
-    candles: 365
-    exchange: kraken
-    indicators:
-      buying:
-        confirmed_bullish: 5
-        fast_k: 10
-        macdhist: 4
-        rsi: 35
-        rsi_bullish: 40
-      selling:
-        fast_k: 80
-        rsi: 70
-      stoch_rsi:
-        fast_d: 3
-        fast_k: 3
-        period: 17
-    strategies:
-    - macd_rsi_stochrsi_strategy_finder
-    time_unit: 1d
-    wallet: 5000
-  ZEC/USD:
-    candles: 365
-    exchange: bitfinex2
-    indicators:
-      buying:
-        confirmed_bullish: 10
-        fast_k: 25
-        macdhist: 1
-        rsi: 35
-        rsi_bullish: 50
-      selling:
-        fast_k: 90
-        rsi: 80
+        rsi_bullish: 80
       stoch_rsi:
         fast_d: 3
         fast_k: 3
