@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 from bokeh.io import output_file, show,save
+=======
+from bokeh.io import output_file, show
+>>>>>>> 85e852c552932eb409a636155a50a18b6b2ec5e9
 from bokeh.plotting import figure
 from bokeh.layouts import layout
 from bokeh.models import Span, CrosshairTool, HoverTool, ResetTool, PanTool, WheelZoomTool, BoxZoomTool, ColumnDataSource, BoxAnnotation, LabelSet
