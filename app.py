@@ -36,7 +36,14 @@ def main():
 	except Exception as e:
 		logger.error("Cannot load telegram object",exc_info=True)
 	
-
+	try:
+		if not os.path.exists("logs"):
+			os.makedirs("logs")
+		if not os.path.exists("charts"):
+			os.makedirs("charts")
+	except Exception as e:
+		logger.error("Cannot create neccessary directories for operations")
+		
 	symbol_conf=conf["symbol"]
 	ex=HistorialData(symbol_conf)
 	for symbol in symbol_conf.keys():

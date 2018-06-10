@@ -95,7 +95,6 @@ class indicators():
         rsi_values['fast_k'] = rsi_values['stoch_rsi'].rolling(window=fastk_period).mean()
         rsi_values['fast_d'] = rsi_values['fast_k'].rolling(window=fastd_period).mean()
         rsi_values.fillna(value=0, inplace=True)
-
         return rsi_values
 
 

@@ -5,6 +5,9 @@ from analyzer import indicators
 import datetime
 import sys
 from chart import chart
+import multiprocessing as mp
+import logging
+
 logger = logging.getLogger(__name__)
 class strategy(object):
 	"""docstring for strategy"""
@@ -89,6 +92,8 @@ class strategy(object):
 				#runing the tunned parameters
 				rsi_stoch_rsi=self.technical_data.stochastic_rsi_cal(self.data_standard,self.symbol_conf["indicators"]["stoch_rsi"]["period"],\
 								self.symbol_conf["indicators"]["stoch_rsi"]["fast_k"],self.symbol_conf["indicators"]["stoch_rsi"]["fast_d"])
+				rsi_stoch_rsi.to_csv("stoch_rsi.csv")
+				self.data_standard.to_csv("standard.csv")
 				macd=self.technical_data.macd_cal(self.data_standard)
 				analytical_data=pandas.concat([self.data_standard,rsi_stoch_rsi,macd],axis=1)
 				analytical_data.dropna(how='all', inplace=True)
@@ -130,29 +135,49 @@ class strategy(object):
 		i_buying_macdhist=self.symbol_conf["indicators"]["buying"]["macdhist"]
 		results.append(self.rsi_stochrsi_strategy_trading(period,fast_k_period,fast_d_period,data,i_selling_rsi,i_selling_rsi_bullish,i_selling_stoch_rsi,i_buying_rsi,i_buying_rsi_bullish,i_buying_stoch_rsi,i_buying_confirmed_bullish,i_buying_rsi_midpoint,i_buying_macdhist))
 		return results
+	
 	def rsi_stochrsi_strategy_bruteforce(self,period,fast_k_period,fast_d_period,data):
 		start_time=time.time()
+		#store results of the search
 		results=[]
+		#create a pool of worker
+		pool = mp.Pool(processes=3)
+		#a jobs to collect results returned by workers
+		jobs=[]
 		logger.info("Starting bruteforce parameters...")
-		#starting the bruteforce to find best combination
-		for i_selling_rsi in range(self.selling_rsi[0],self.selling_rsi[1]+1,self.selling_rsi[2]):
-			for i_selling_rsi_bullish in range(self.selling_rsi_bullish[0],self.selling_rsi_bullish[1]+1,self.selling_rsi_bullish[2]):
-				for i_selling_stoch_rsi in range(self.selling_stoch_rsi[0],self.selling_stoch_rsi[1]+1,self.selling_stoch_rsi[2]):
-					for i_buying_rsi in range(self.buying_rsi[0],self.buying_rsi[1]+1,self.buying_rsi[2]):
-						for i_buying_rsi_bullish in range(self.buying_rsi_bullish[0],self.buying_rsi_bullish[1]+1,self.buying_rsi_bullish[2]):
-							for i_buying_stoch_rsi in range(self.buying_stoch_rsi[0],self.buying_stoch_rsi[1]+1,self.buying_stoch_rsi[2]):
-								for i_buying_confirmed_bullish in range(self.buying_confirmed_bullish[0],self.buying_confirmed_bullish[1]+1,self.buying_confirmed_bullish[2]):
-									for i_buying_rsi_midpoint in range(self.buying_rsi_midpoint[0],self.buying_rsi_midpoint[1]+1,self.buying_rsi_midpoint[2]):
-										for i_buying_macdhist in range(self.buying_macdhist[0],self.buying_macdhist[1]+1,self.buying_macdhist[2]):
-											result=self.rsi_stochrsi_strategy_trading(period,fast_k_period,fast_d_period,data,i_selling_rsi,i_selling_rsi_bullish,i_selling_stoch_rsi,i_buying_rsi,i_buying_rsi_bullish,i_buying_stoch_rsi,i_buying_confirmed_bullish,i_buying_rsi_midpoint,i_buying_macdhist)
-											if result:
-												results.append(result)
-		# in case of no profitable strategy, add None to results
-		if len(results)==0:
-			results.append(None)
-		logger.info("Tottal bruteforce time is %s minutes",str((start_time - time.time())/60))
-		return results
-
+		count=1
+		try:
+			#starting the bruteforce to find best combination
+			for i_selling_rsi in range(self.selling_rsi[0],self.selling_rsi[1]+1,self.selling_rsi[2]):
+				for i_selling_rsi_bullish in range(self.selling_rsi_bullish[0],self.selling_rsi_bullish[1]+1,self.selling_rsi_bullish[2]):
+					for i_selling_stoch_rsi in range(self.selling_stoch_rsi[0],self.selling_stoch_rsi[1]+1,self.selling_stoch_rsi[2]):
+						for i_buying_rsi in range(self.buying_rsi[0],self.buying_rsi[1]+1,self.buying_rsi[2]):
+							for i_buying_rsi_bullish in range(self.buying_rsi_bullish[0],self.buying_rsi_bullish[1]+1,self.buying_rsi_bullish[2]):
+								for i_buying_stoch_rsi in range(self.buying_stoch_rsi[0],self.buying_stoch_rsi[1]+1,self.buying_stoch_rsi[2]):
+									for i_buying_confirmed_bullish in range(self.buying_confirmed_bullish[0],self.buying_confirmed_bullish[1]+1,self.buying_confirmed_bullish[2]):
+										for i_buying_rsi_midpoint in range(self.buying_rsi_midpoint[0],self.buying_rsi_midpoint[1]+1,self.buying_rsi_midpoint[2]):
+											for i_buying_macdhist in range(self.buying_macdhist[0],self.buying_macdhist[1]+1,self.buying_macdhist[2]):
+												jobs.append(pool.apply_async(self,args=(period,fast_k_period,fast_d_period,data,i_selling_rsi,i_selling_rsi_bullish,i_selling_stoch_rsi,i_buying_rsi,i_buying_rsi_bullish,i_buying_stoch_rsi,i_buying_confirmed_bullish,i_buying_rsi_midpoint,i_buying_macdhist)))
+												# count+=1
+												# print count
+			pool.close()
+			pool.join()
+			logger.info("All workers have finished")
+			#get returned results for works
+			for job in jobs:
+				if job.get():
+					results.append(job.get())
+			# in case of no profitable strategy, add None to results
+			if len(results)==0:
+				results.append(None)
+			logger.info("Tottal bruteforce time is %s minutes",str((start_time - time.time())/60))
+			return results
+		except Exception as e:
+			logger.error("Error when runing bruteforce",exc_info=True)
+			sys.exit(1)
+	#to solve the problem of pickling with multiprocessing library
+	def __call__(self, period,fast_k_period,fast_d_period,data,selling_rsi,selling_rsi_bullish,selling_stoch_rsi,buying_rsi,buying_rsi_bullish,buying_stoch_rsi,buying_confirmed_bullish,buying_rsi_midpoint,buying_macdhist):
+		return self.rsi_stochrsi_strategy_trading(period,fast_k_period,fast_d_period,data,selling_rsi,selling_rsi_bullish,selling_stoch_rsi,buying_rsi,buying_rsi_bullish,buying_stoch_rsi,buying_confirmed_bullish,buying_rsi_midpoint,buying_macdhist)
 	def rsi_stochrsi_strategy_trading(self,period,fast_k_period,fast_d_period,data,selling_rsi,selling_rsi_bullish,selling_stoch_rsi,buying_rsi,buying_rsi_bullish,buying_stoch_rsi,buying_confirmed_bullish,buying_rsi_midpoint,buying_macdhist):
 		start_time=time.time()
 		balance=self.symbol_conf["wallet"]
@@ -163,7 +188,7 @@ class strategy(object):
 		data=self.is_bullish(buying_confirmed_bullish,buying_rsi_midpoint,data)
 		#provide recommendation according to the defined strategy
 		recommendation= "no"
-		
+		bullish_macd_confirmation=False
 		for row in range(data_length):		
 			"""Buy decision
 			(1) in bullish market, try to join at the bottom based on RSI and stochatic RSI
@@ -176,28 +201,70 @@ class strategy(object):
 			date=data.index[row]
 			is_bullish=data.iloc[row]["is_bullish"]
 			macdhist=data.iloc[row]["macdhist"]
+			
+			if (is_bullish==False and bullish_macd_confirmation):
+				bullish_macd_confirmation=False
 			#buying decision
-			#for bearish
-			if (fast_k>0 and rsi>0 and ((rsi<buying_rsi and is_bullish==False) or (rsi<buying_rsi_bullish and is_bullish)) and \
-				fast_k<buying_stoch_rsi and fast_k>fast_d and macdhist>=(float(buying_macdhist)/100)*close_price*-1):
+			if fast_k>0 and rsi>0 and fast_k<buying_stoch_rsi and fast_k>fast_d:
+				#for bearish market
+				if (rsi<buying_rsi and is_bullish==False):
+					
+					if balance>0:
+						crypto+=(balance/close_price)*0.99 #close price, excluding 0.1% fee
+						balance=0# after buying crypto
+						#time,price, crypto, balance
+						recorded_transaction.append(("buying_bearish",date,close_price,crypto,balance)) 
+						logger.debug("Purchase at %s: %s at price %s - current balance: %s",str(date),str(crypto),str(close_price),str(balance))
+					if row==data_length-1:
+						recommendation="buy bearish"
+				#For bullish market
+				if (rsi<buying_rsi_bullish and is_bullish):
+					if macdhist>=0:
+						if balance>0:
+							crypto+=(balance/close_price)*0.99 #close price, excluding 0.1% fee
+							balance=0# after buying crypto
+							#time,price, crypto, balance
+							recorded_transaction.append(("buying_bullish",date,close_price,crypto,balance)) 
+							logger.debug("Purchase at %s: %s at price %s - current balance: %s",str(date),str(crypto),str(close_price),str(balance))
+							#provide recommendation via telegram
+						if row==data_length-1:
+							recommendation="buy bullish"
+					else:
+						bullish_macd_confirmation=True
+						recommendation="buy bullish (without confirmation)"
+			if bullish_macd_confirmation and macdhist>=0:
+				bullish_macd_confirmation=False
 				if balance>0:
 					crypto+=(balance/close_price)*0.99 #close price, excluding 0.1% fee
-					balance=0 # after buying crypto
+					balance=0# after buying crypto
 					#time,price, crypto, balance
-					recorded_transaction.append(("buying",date,close_price,crypto,balance)) 
+					recorded_transaction.append(("buying_bullish_confirmed",date,close_price,crypto,balance)) 
 					logger.debug("Purchase at %s: %s at price %s - current balance: %s",str(date),str(crypto),str(close_price),str(balance))
+					#provide recommendation via telegram
 				if row==data_length-1:
-					recommendation="buy"
+					recommendation="buy bullish by macd"
+
+
 			#Sell decision
-			if (((is_bullish==False and rsi>selling_rsi) or (is_bullish and rsi>selling_rsi_bullish)) and fast_k>=selling_stoch_rsi):
-				if crypto>0:
-					balance+=(crypto*close_price)*0.99 #close price, excluding 0.1% fee
-					logger.debug("Sell at %s: %s at price %s - current balance: %s",str(date),str(crypto),str(close_price),str(balance))
-					crypto=0
-					#time,price, crypto, balance
-					recorded_transaction.append(("selling",date,close_price,crypto,balance)) 
-				if row==data_length-1:
-					recommendation="sell"
+			if (fast_k>=selling_stoch_rsi):
+				if (is_bullish==False and rsi>selling_rsi):
+					if crypto>0:
+						balance+=(crypto*close_price)*0.99 #close price, excluding 0.1% fee
+						logger.debug("Sell at %s: %s at price %s - current balance: %s",str(date),str(crypto),str(close_price),str(balance))
+						crypto=0
+						#time,price, crypto, balance
+						recorded_transaction.append(("selling_bearish",date,close_price,crypto,balance)) 
+					if row==data_length-1:
+						recommendation="sell bearish"
+				if (is_bullish and rsi>selling_rsi_bullish):
+					if crypto>0:
+						balance+=(crypto*close_price)*0.99 #close price, excluding 0.1% fee
+						logger.debug("Sell at %s: %s at price %s - current balance: %s",str(date),str(crypto),str(close_price),str(balance))
+						crypto=0
+						#time,price, crypto, balance
+						recorded_transaction.append(("selling_bullish",date,close_price,crypto,balance)) 
+					if row==data_length-1:
+						recommendation="sell bullish"
 				
 		#end of for loop
 
