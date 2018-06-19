@@ -24,7 +24,7 @@ class chart():
 		# plot = "f= " + p
 		# exec(plot) #execute the function in string "f = [(),(),()]"
 		#Convert the matrix to dataframe
-		f=result["recorded_transaction"]
+		f=result[-2] #recorded_transaction
 		f = pd.DataFrame(f, columns=['action', 'datetime', 'price', 'amount_cryp', 'balance'])
 		f["datetime"] = pd.to_datetime(f["datetime"])
 		#Separate selling records from buying records

@@ -34,7 +34,7 @@ def main():
 		telegram=TelegramNotifier(conf["notifier"]["telegram"]["api"],conf["notifier"]["telegram"]["chat_id"])
 		logger.info("Loaded telegram")
 	except Exception as e:
-		logger.error("Cannot load telegram object",exc_info=True)
+		logger.error("Cannot load telegram object")#,exc_info=True)
 	
 	try:
 		if not os.path.exists("logs"):
@@ -52,7 +52,9 @@ def main():
 		time_unit=symbol_conf[symbol]["time_unit"]
 		candles=symbol_conf[symbol]["candles"]
 		#get historical data from symbol and symbol identified
+		logger.info("===========================================")
 		logger.info("Get historical data %s:%s",exchange,symbol)
+		logger.info("===========================================")
 		try:
 			data=ex.get_historical_data(symbol,exchange,time_unit,candles)
 		except Exception as e:
@@ -68,88 +70,94 @@ def main():
 		#temporary test of results
 		for st in symbol_conf[symbol]["strategies"]:
 			#only process if there are strategies that are profitable
-			if not results[st].empty:
-				trading_result=results[st]
-				#for trading_result in strategy_result:
-				message=symbol + ":" + st +"/n"
-				# frame=df(trading_result)
-				# frame.columns=["period","fast_k_period","fast_d_period","selling_rsi","selling_rsi_bullish","selling_stoch_rsi","buying_rsi","buying_rsi_bullish","buying_stoch_rsi","buying_confirmed_pullish","buying_rsi_pullish","buying_macdhist","balance","profit","recorded_transaction","recommendation"]
-				# frame=frame.sort_values("profit")
-				logger.info("Results for symbol: %s",symbol)
-				logger.info("\n%s",trading_result)
-				message+=str(trading_result)+"\n"
-				logger.info("Transaction details:")
-				for ts in trading_result["recorded_transaction"]:
-					logger.info("%s",ts)
-					#message+=str(ts)
-				try:
-					if trading_result["recommendation"]!="no":
-						telegram.notify(message)
-				except Exception as e:
-					logger.error("Telegram is having error and cannot send message(s)",exc_info=True)
-				#check configuration and update with new parameters if having
-				if "indicators" in symbol_conf[symbol]:
-					# stochastic RSI parameters
-					if symbol_conf[symbol]["indicators"]["stoch_rsi"]["period"] != trading_result["period"]:
-						logger.info("Change stoch_rsi_period from %s to %s", str(symbol_conf[symbol]["indicators"]["stoch_rsi"]["period"]),str(trading_result["period"]))
-						symbol_conf[symbol]["indicators"]["stoch_rsi"]["period"] = int(trading_result["period"])
+	
+			result=results[st]
+			#for trading_result in strategy_result:
+			message=symbol + ":" + st +"/n"
 
-					if symbol_conf[symbol]["indicators"]["stoch_rsi"]["fast_k"] != trading_result["fast_k_period"]:
-						logger.info("Change stoch_rsi_fast_k from %s to %s", str(symbol_conf[symbol]["indicators"]["stoch_rsi"]["fast_k"]),str(trading_result["fast_k_period"]))
-						symbol_conf[symbol]["indicators"]["stoch_rsi"]["fast_k"] = int(trading_result["fast_k_period"])
+			#convert to a dataframe for easy referencing
+			result_array=[]
+			result_array.append(result)
+			trading_result=df(result_array)
+			trading_result.columns=["period","fast_k_period","fast_d_period","selling_rsi","selling_rsi_bullish","selling_stoch_rsi","buying_rsi","buying_rsi_bullish","buying_stoch_rsi","buying_confirmed_pullish","buying_rsi_pullish","buying_macdhist","balance","profit","recorded_transaction","recommendation"]
+			trading_result=trading_result.iloc[0]
 
+			#start updating configuration file if there are changes
+			logger.info("Results for symbol: %s",symbol)
+			logger.info("\n%s",trading_result)
+			message+=str(trading_result)+"\n"
+			logger.info("Transaction details:")
+			for ts in trading_result["recorded_transaction"]:
+				logger.info("%s",ts)
+				#message+=str(ts)
+			try:
+				if trading_result["recommendation"]!="no":
+					telegram.notify(message)
+			except Exception as e:
+				logger.error("Telegram is having error and cannot send message(s)")#,exc_info=True)
+			#check configuration and update with new parameters if having
+			if "indicators" in symbol_conf[symbol]:
+				# stochastic RSI parameters
+				if symbol_conf[symbol]["indicators"]["stoch_rsi"]["period"] != trading_result["period"]:
+					logger.info("Change stoch_rsi_period from %s to %s", str(symbol_conf[symbol]["indicators"]["stoch_rsi"]["period"]),str(trading_result["period"]))
+					symbol_conf[symbol]["indicators"]["stoch_rsi"]["period"] = int(trading_result["period"])
 
-					if symbol_conf[symbol]["indicators"]["stoch_rsi"]["fast_d"] != trading_result["fast_d_period"]:
-						logger.info("Change stoch_rsi_fast_d from %s to %s", str(symbol_conf[symbol]["indicators"]["stoch_rsi"]["fast_d"]),str(trading_result["fast_d_period"]))
-						symbol_conf[symbol]["indicators"]["stoch_rsi"]["fast_d"] = int(trading_result["fast_d_period"])
-					#selling indicators
-					if symbol_conf[symbol]["indicators"]["selling"]["rsi"] != trading_result["selling_rsi"]:
-						logger.info("Change selling_rsi from %s to %s", str(symbol_conf[symbol]["indicators"]["selling"]["rsi"]),str(trading_result["selling_rsi"]))
-						symbol_conf[symbol]["indicators"]["selling"]["rsi"] = int(trading_result["selling_rsi"])
-					
-					if symbol_conf[symbol]["indicators"]["selling"]["rsi_bullish"] != trading_result["selling_rsi_bullish"]:
-						logger.info("Change selling_rsi_bullish from %s to %s", str(symbol_conf[symbol]["indicators"]["selling"]["rsi_bullish"]),str(trading_result["selling_rsi_bullish"]))
-						symbol_conf[symbol]["indicators"]["selling"]["rsi_bullish"] = int(trading_result["selling_rsi_bullish"])
-
-					if symbol_conf[symbol]["indicators"]["selling"]["fast_k"] != trading_result["selling_stoch_rsi"]:
-						logger.info("Change selling_stoch_rsi from %s to %s", str(symbol_conf[symbol]["indicators"]["selling"]["fast_k"]),str(trading_result["selling_stoch_rsi"]))
-						symbol_conf[symbol]["indicators"]["selling"]["rsi"] = int(trading_result["selling_rsi"])
-					
-					#buying indicators
-					if symbol_conf[symbol]["indicators"]["buying"]["rsi"] != trading_result["buying_rsi"]:
-						logger.info("Change buying_rsi from %s to %s", str(symbol_conf[symbol]["indicators"]["buying"]["rsi"]),str(trading_result["buying_rsi"]))
-						symbol_conf[symbol]["indicators"]["buying"]["rsi"] = int(trading_result["buying_rsi"])
-
-					if symbol_conf[symbol]["indicators"]["buying"]["rsi_bullish"] != trading_result["buying_rsi_bullish"]:
-						logger.info("Change buying_rsi_bullish from %s to %s", str(symbol_conf[symbol]["indicators"]["buying"]["rsi_bullish"]),str(trading_result["buying_rsi_bullish"]))
-						symbol_conf[symbol]["indicators"]["buying"]["rsi_bullish"] = int(trading_result["buying_rsi_bullish"])
-
-					if symbol_conf[symbol]["indicators"]["buying"]["fast_k"] != trading_result["buying_stoch_rsi"]:
-						logger.info("Change buying_stoch_rsi from %s to %s", str(symbol_conf[symbol]["indicators"]["buying"]["fast_k"]),str(trading_result["buying_stoch_rsi"]))
-						symbol_conf[symbol]["indicators"]["buying"]["fast_k"] = int(trading_result["buying_stoch_rsi"])
+				if symbol_conf[symbol]["indicators"]["stoch_rsi"]["fast_k"] != trading_result["fast_k_period"]:
+					logger.info("Change stoch_rsi_fast_k from %s to %s", str(symbol_conf[symbol]["indicators"]["stoch_rsi"]["fast_k"]),str(trading_result["fast_k_period"]))
+					symbol_conf[symbol]["indicators"]["stoch_rsi"]["fast_k"] = int(trading_result["fast_k_period"])
 
 
-					if symbol_conf[symbol]["indicators"]["buying"]["confirmed_bullish"] != trading_result["buying_confirmed_pullish"]:
-						logger.info("Change buying_confirmed_pullish from %s to %s", str(symbol_conf[symbol]["indicators"]["buying"]["confirmed_bullish"]),str(trading_result["buying_confirmed_pullish"]))
-						symbol_conf[symbol]["indicators"]["buying"]["confirmed_bullish"] = int(trading_result["buying_confirmed_pullish"])
+				if symbol_conf[symbol]["indicators"]["stoch_rsi"]["fast_d"] != trading_result["fast_d_period"]:
+					logger.info("Change stoch_rsi_fast_d from %s to %s", str(symbol_conf[symbol]["indicators"]["stoch_rsi"]["fast_d"]),str(trading_result["fast_d_period"]))
+					symbol_conf[symbol]["indicators"]["stoch_rsi"]["fast_d"] = int(trading_result["fast_d_period"])
+				#selling indicators
+				if symbol_conf[symbol]["indicators"]["selling"]["rsi"] != trading_result["selling_rsi"]:
+					logger.info("Change selling_rsi from %s to %s", str(symbol_conf[symbol]["indicators"]["selling"]["rsi"]),str(trading_result["selling_rsi"]))
+					symbol_conf[symbol]["indicators"]["selling"]["rsi"] = int(trading_result["selling_rsi"])
+				
+				if symbol_conf[symbol]["indicators"]["selling"]["rsi_bullish"] != trading_result["selling_rsi_bullish"]:
+					logger.info("Change selling_rsi_bullish from %s to %s", str(symbol_conf[symbol]["indicators"]["selling"]["rsi_bullish"]),str(trading_result["selling_rsi_bullish"]))
+					symbol_conf[symbol]["indicators"]["selling"]["rsi_bullish"] = int(trading_result["selling_rsi_bullish"])
 
-					if symbol_conf[symbol]["indicators"]["buying"]["rsi_midpoint"] != trading_result["buying_rsi_pullish"]:
-						logger.info("Change buying_rsi_pullish from %s to %s", str(symbol_conf[symbol]["indicators"]["buying"]["rsi_midpoint"]),str(trading_result["buying_rsi_pullish"]))
-						symbol_conf[symbol]["indicators"]["buying"]["rsi_midpoint"] = int(trading_result["buying_rsi_pullish"])
+				if symbol_conf[symbol]["indicators"]["selling"]["fast_k"] != trading_result["selling_stoch_rsi"]:
+					logger.info("Change selling_stoch_rsi from %s to %s", str(symbol_conf[symbol]["indicators"]["selling"]["fast_k"]),str(trading_result["selling_stoch_rsi"]))
+					symbol_conf[symbol]["indicators"]["selling"]["rsi"] = int(trading_result["selling_rsi"])
+				
+				#buying indicators
+				if symbol_conf[symbol]["indicators"]["buying"]["rsi"] != trading_result["buying_rsi"]:
+					logger.info("Change buying_rsi from %s to %s", str(symbol_conf[symbol]["indicators"]["buying"]["rsi"]),str(trading_result["buying_rsi"]))
+					symbol_conf[symbol]["indicators"]["buying"]["rsi"] = int(trading_result["buying_rsi"])
+
+				if symbol_conf[symbol]["indicators"]["buying"]["rsi_bullish"] != trading_result["buying_rsi_bullish"]:
+					logger.info("Change buying_rsi_bullish from %s to %s", str(symbol_conf[symbol]["indicators"]["buying"]["rsi_bullish"]),str(trading_result["buying_rsi_bullish"]))
+					symbol_conf[symbol]["indicators"]["buying"]["rsi_bullish"] = int(trading_result["buying_rsi_bullish"])
+
+				if symbol_conf[symbol]["indicators"]["buying"]["fast_k"] != trading_result["buying_stoch_rsi"]:
+					logger.info("Change buying_stoch_rsi from %s to %s", str(symbol_conf[symbol]["indicators"]["buying"]["fast_k"]),str(trading_result["buying_stoch_rsi"]))
+					symbol_conf[symbol]["indicators"]["buying"]["fast_k"] = int(trading_result["buying_stoch_rsi"])
 
 
-					if symbol_conf[symbol]["indicators"]["buying"]["macdhist"] != trading_result["buying_macdhist"]:
-						logger.info("Change buying_macdhist from %s to %s", str(symbol_conf[symbol]["indicators"]["buying"]["macdhist"]),str(trading_result["buying_macdhist"]))
-						symbol_conf[symbol]["indicators"]["buying"]["macdhist"] = int(trading_result["buying_macdhist"])
-				else:
-					indicators={"selling":{"rsi":int(trading_result["selling_rsi"]),"rsi_bullish":int(trading_result["selling_rsi_bullish"]), "fast_k":int(trading_result["selling_stoch_rsi"])},\
-								"buying":{"rsi":int(trading_result["buying_rsi"]),"rsi_bullish":int(trading_result["buying_rsi_bullish"]), "fast_k":int(trading_result["buying_stoch_rsi"]),\
-								"confirmed_bullish":int(trading_result["buying_confirmed_pullish"]),"rsi_midpoint":int(trading_result["buying_rsi_pullish"]),\
-								"macdhist":int(trading_result["buying_macdhist"])},\
-								"stoch_rsi":{"period":int(trading_result["period"]),"fast_k":int(trading_result["fast_k_period"]),"fast_d":int(trading_result["fast_d_period"])}}
-					symbol_conf[symbol]["indicators"]=indicators
+				if symbol_conf[symbol]["indicators"]["buying"]["confirmed_bullish"] != trading_result["buying_confirmed_pullish"]:
+					logger.info("Change buying_confirmed_pullish from %s to %s", str(symbol_conf[symbol]["indicators"]["buying"]["confirmed_bullish"]),str(trading_result["buying_confirmed_pullish"]))
+					symbol_conf[symbol]["indicators"]["buying"]["confirmed_bullish"] = int(trading_result["buying_confirmed_pullish"])
+
+				if symbol_conf[symbol]["indicators"]["buying"]["rsi_midpoint"] != trading_result["buying_rsi_pullish"]:
+					logger.info("Change buying_rsi_pullish from %s to %s", str(symbol_conf[symbol]["indicators"]["buying"]["rsi_midpoint"]),str(trading_result["buying_rsi_pullish"]))
+					symbol_conf[symbol]["indicators"]["buying"]["rsi_midpoint"] = int(trading_result["buying_rsi_pullish"])
+
+
+				if symbol_conf[symbol]["indicators"]["buying"]["macdhist"] != trading_result["buying_macdhist"]:
+					logger.info("Change buying_macdhist from %s to %s", str(symbol_conf[symbol]["indicators"]["buying"]["macdhist"]),str(trading_result["buying_macdhist"]))
+					symbol_conf[symbol]["indicators"]["buying"]["macdhist"] = int(trading_result["buying_macdhist"])
 			else:
-				logger.info("There is no profitable strategy found for this symbol")
+				indicators={"selling":{"rsi":int(trading_result["selling_rsi"]),"rsi_bullish":int(trading_result["selling_rsi_bullish"]), "fast_k":int(trading_result["selling_stoch_rsi"])},\
+							"buying":{"rsi":int(trading_result["buying_rsi"]),"rsi_bullish":int(trading_result["buying_rsi_bullish"]), "fast_k":int(trading_result["buying_stoch_rsi"]),\
+							"confirmed_bullish":int(trading_result["buying_confirmed_pullish"]),"rsi_midpoint":int(trading_result["buying_rsi_pullish"]),\
+							"macdhist":int(trading_result["buying_macdhist"])},\
+							"stoch_rsi":{"period":int(trading_result["period"]),"fast_k":int(trading_result["fast_k_period"]),"fast_d":int(trading_result["fast_d_period"])}}
+				symbol_conf[symbol]["indicators"]=indicators
+		# else:
+		# 	logger.info("There is no profitable strategy found for this symbol")
 		#Automatically update configuration file
 		conf["symbol"]=symbol_conf
 		with open('conf.yml', 'w') as outfile:
