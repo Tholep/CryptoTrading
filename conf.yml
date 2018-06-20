@@ -30,17 +30,17 @@ indicators:
     - 90
     - 5
     rsi:
-    - 50
+    - 60
     - 70
     - 3
     rsi_bullish:
-    - 65
+    - 70
     - 85
     - 3
   stoch_rsi:
     fast_d: 3
     fast_k: 3
-    period: 
+    period:
     - 17
     - 17
     - 3
@@ -83,8 +83,54 @@ notifier:
     api: null
     chat_id: null
 symbol:
+  ETC/EUR:
+    candles: 365
+    exchange: kraken
+    indicators:
+      buying:
+        confirmed_bullish: 15
+        fast_k: 19
+        macdhist: 1
+        rsi: 38
+        rsi_bullish: 58
+        rsi_midpoint: 50
+      selling:
+        fast_k: 90
+        rsi: 60
+        rsi_bullish: 70
+      stoch_rsi:
+        fast_d: 3
+        fast_k: 3
+        period: 17
+    strategies:
+    - macd_rsi_stochrsi_strategy_finder
+    time_unit: 1d
+    wallet: 5000
   ETH/EUR:
     candles: 720
+    exchange: kraken
+    indicators:
+      buying:
+        confirmed_bullish: 15
+        fast_k: 16
+        macdhist: 1
+        rsi: 29
+        rsi_bullish: 58
+        rsi_midpoint: 50
+      selling:
+        fast_k: 90
+        rsi: 66
+        rsi_bullish: 82
+      stoch_rsi:
+        fast_d: 3
+        fast_k: 3
+        period: 17
+    strategies:
+    - macd_rsi_stochrsi_strategy_finder
+    time_unit: 1d
+    wallet: 5000
+  XMR/USD:
+    candles: 365
     exchange: kraken
     strategies:
     - macd_rsi_stochrsi_strategy_finder

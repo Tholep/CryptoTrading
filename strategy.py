@@ -107,7 +107,7 @@ class strategy(object):
 		if results[0]!=None:
 			frame=pandas.DataFrame(results)
 			frame.columns=["period","fast_k_period","fast_d_period","selling_rsi","selling_rsi_bullish","selling_stoch_rsi",\
-							"buying_rsi","buying_rsi_bullish","buying_stoch_rsi","buying_confirmed_pullish","buying_rsi_pullish",\
+							"buying_rsi","buying_rsi_bullish","buying_stoch_rsi","buying_confirmed_pullish","buying_rsi_midpoint",\
 							"buying_macdhist","balance","profit","recorded_transaction","recommendation"]
 			frame=frame.sort_values("profit")
 			most_profit=frame.iloc[-1]

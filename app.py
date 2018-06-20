@@ -144,7 +144,7 @@ def main():
 				else:
 					indicators={"selling":{"rsi":int(trading_result["selling_rsi"]),"rsi_bullish":int(trading_result["selling_rsi_bullish"]), "fast_k":int(trading_result["selling_stoch_rsi"])},\
 								"buying":{"rsi":int(trading_result["buying_rsi"]),"rsi_bullish":int(trading_result["buying_rsi_bullish"]), "fast_k":int(trading_result["buying_stoch_rsi"]),\
-								"confirmed_bullish":int(trading_result["buying_confirmed_pullish"]),"rsi_midpoint":int(trading_result["buying_rsi_pullish"]),\
+								"confirmed_bullish":int(trading_result["buying_confirmed_pullish"]),"rsi_midpoint":int(trading_result["buying_rsi_midpoint"]),\
 								"macdhist":int(trading_result["buying_macdhist"])},\
 								"stoch_rsi":{"period":int(trading_result["period"]),"fast_k":int(trading_result["fast_k_period"]),"fast_d":int(trading_result["fast_d_period"])}}
 					symbol_conf[symbol]["indicators"]=indicators
