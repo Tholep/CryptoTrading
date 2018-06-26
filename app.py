@@ -6,7 +6,7 @@ import yaml
 import pandas
 from pandas import DataFrame as df
 from datetime import datetime
-
+import os
 #import modules
 from historicaldata import HistorialData
 from notifier import TelegramNotifier
@@ -34,7 +34,7 @@ def main():
 		telegram=TelegramNotifier(conf["notifier"]["telegram"]["api"],conf["notifier"]["telegram"]["chat_id"])
 		logger.info("Loaded telegram")
 	except Exception as e:
-		logger.error("Cannot load telegram object")
+		logger.error("Cannot load telegram object",exc_info=True)
 	
 	try:
 		if not os.path.exists("logs"):
@@ -42,7 +42,7 @@ def main():
 		if not os.path.exists("charts"):
 			os.makedirs("charts")
 	except Exception as e:
-		logger.error("Cannot create neccessary directories for operations")
+		logger.error("Cannot create neccessary directories for operations",exc_info=True)
 		
 	symbol_conf=conf["symbol"]
 	ex=HistorialData(symbol_conf)
