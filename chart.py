@@ -29,7 +29,7 @@ class chart():
 		f["datetime"] = pd.to_datetime(f["datetime"])
 		#Separate selling records from buying records
 		sell= f.loc[f['action']=='selling']
-		buy= f.loc[f['action']=='buying']
+		buy= f.loc[f['action']!='selling']
 		return sell, buy
 
 	def candlestick(self,name):

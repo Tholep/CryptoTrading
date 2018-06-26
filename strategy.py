@@ -170,7 +170,7 @@ class strategy(object):
 			# in case of no profitable strategy, add None to results
 			if len(results)==0:
 				results.append(None)
-			logger.info("Tottal bruteforce time is %s minutes",str((start_time - time.time())/60))
+			logger.info("Tottal bruteforce time is %s minutes",str((time.time()-start_time)/60))
 			return results
 		except Exception as e:
 			logger.error("Error when runing bruteforce",exc_info=True)
@@ -183,17 +183,15 @@ class strategy(object):
 		balance=self.symbol_conf["wallet"]
 		crypto=0
 		data_length=len(data)
+		
 		#Record sell and buy transactions
 		recorded_transaction=[]
 		data=self.is_bullish(buying_confirmed_bullish,buying_rsi_midpoint,data)
+		data.to_csv("test.csv")
 		#provide recommendation according to the defined strategy
 		recommendation= "no"
 		bullish_macd_confirmation=False
 		for row in range(data_length):		
-			"""Buy decision
-			(1) in bullish market, try to join at the bottom based on RSI and stochatic RSI
-			(2) in bullish market (defined by the last 15 days, RSI above 50)
-			"""
 			rsi=data.iloc[row]["rsi"]
 			fast_k=data.iloc[row]["fast_k"]
 			fast_d=data.iloc[row]["fast_d"]
@@ -231,7 +229,8 @@ class strategy(object):
 							recommendation="buy bullish"
 					else:
 						bullish_macd_confirmation=True
-						recommendation="buy bullish (without confirmation)"
+						if row==data_length-1:
+							recommendation="buy bullish (without confirmation)"
 			if bullish_macd_confirmation and macdhist>=0:
 				bullish_macd_confirmation=False
 				if balance>0:

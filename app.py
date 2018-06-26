@@ -34,7 +34,7 @@ def main():
 		telegram=TelegramNotifier(conf["notifier"]["telegram"]["api"],conf["notifier"]["telegram"]["chat_id"])
 		logger.info("Loaded telegram")
 	except Exception as e:
-		logger.error("Cannot load telegram object",exc_info=True)
+		logger.error("Cannot load telegram object")
 	
 	try:
 		if not os.path.exists("logs"):
@@ -73,7 +73,7 @@ def main():
 				#for trading_result in strategy_result:
 				message=symbol + ":" + st +"/n"
 				# frame=df(trading_result)
-				# frame.columns=["period","fast_k_period","fast_d_period","selling_rsi","selling_rsi_bullish","selling_stoch_rsi","buying_rsi","buying_rsi_bullish","buying_stoch_rsi","buying_confirmed_pullish","buying_rsi_pullish","buying_macdhist","balance","profit","recorded_transaction","recommendation"]
+				# frame.columns=["period","fast_k_period","fast_d_period","selling_rsi","selling_rsi_bullish","selling_stoch_rsi","buying_rsi","buying_rsi_bullish","buying_stoch_rsi","buying_confirmed_pullish","buying_rsi_midpoint","buying_macdhist","balance","profit","recorded_transaction","recommendation"]
 				# frame=frame.sort_values("profit")
 				logger.info("Results for symbol: %s",symbol)
 				logger.info("\n%s",trading_result)
@@ -86,7 +86,7 @@ def main():
 					if trading_result["recommendation"]!="no":
 						telegram.notify(message)
 				except Exception as e:
-					logger.error("Telegram is having error and cannot send message(s)",exc_info=True)
+					logger.error("Telegram is having error and cannot send message(s)")
 				#check configuration and update with new parameters if having
 				if "indicators" in symbol_conf[symbol]:
 					# stochastic RSI parameters
@@ -133,9 +133,9 @@ def main():
 						logger.info("Change buying_confirmed_pullish from %s to %s", str(symbol_conf[symbol]["indicators"]["buying"]["confirmed_bullish"]),str(trading_result["buying_confirmed_pullish"]))
 						symbol_conf[symbol]["indicators"]["buying"]["confirmed_bullish"] = int(trading_result["buying_confirmed_pullish"])
 
-					if symbol_conf[symbol]["indicators"]["buying"]["rsi_midpoint"] != trading_result["buying_rsi_pullish"]:
-						logger.info("Change buying_rsi_pullish from %s to %s", str(symbol_conf[symbol]["indicators"]["buying"]["rsi_midpoint"]),str(trading_result["buying_rsi_pullish"]))
-						symbol_conf[symbol]["indicators"]["buying"]["rsi_midpoint"] = int(trading_result["buying_rsi_pullish"])
+					if symbol_conf[symbol]["indicators"]["buying"]["rsi_midpoint"] != trading_result["buying_rsi_midpoint"]:
+						logger.info("Change buying_rsi_midpoint from %s to %s", str(symbol_conf[symbol]["indicators"]["buying"]["rsi_midpoint"]),str(trading_result["buying_rsi_midpoint"]))
+						symbol_conf[symbol]["indicators"]["buying"]["rsi_midpoint"] = int(trading_result["buying_rsi_midpoint"])
 
 
 					if symbol_conf[symbol]["indicators"]["buying"]["macdhist"] != trading_result["buying_macdhist"]:
