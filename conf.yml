@@ -80,8 +80,8 @@ logging:
   version: 1
 notifier:
   telegram:
-    api: null
-    chat_id: null
+    api:509454533:AAHnp8d8thCK21XPZtrHEkgPa4cUnU89oxw
+    chat_id:-300584893
 symbol:
   ADA/ETH:
     candles: 365
