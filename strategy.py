@@ -81,7 +81,7 @@ class strategy(object):
 		#Run bruteforce every Friday or the symbol is not tuned yet
 		try:
 			#Monday is 0 and Sunday is 6
-			if (datetime.datetime.today().weekday()==3) or (not "indicators" in self.symbol_conf):
+			if (not "indicators" in self.symbol_conf):#(datetime.datetime.today().weekday()==3) or 
 				for period in range (self.rsi_period[0],self.rsi_period[1]+1,self.rsi_period[2]):
 					rsi_stoch_rsi=self.technical_data.stochastic_rsi_cal(self.data_standard,period,self.fast_k,self.fast_d)
 					macd=self.technical_data.macd_cal(self.data_standard)
