@@ -25,11 +25,11 @@ class chart():
 		# exec(plot) #execute the function in string "f = [(),(),()]"
 		#Convert the matrix to dataframe
 		f=result["recorded_transaction"]
-		f = pd.DataFrame(f, columns=['action', 'datetime', 'price', 'amount_cryp', 'balance'])
+		f = pd.DataFrame(f, columns=['action','description', 'datetime', 'price', 'amount_cryp', 'balance'])
 		f["datetime"] = pd.to_datetime(f["datetime"])
 		#Separate selling records from buying records
 		sell= f.loc[f['action']=='selling']
-		buy= f.loc[f['action']!='selling']
+		buy= f.loc[f['action']=='buying']
 		return sell, buy
 
 	def candlestick(self,name):

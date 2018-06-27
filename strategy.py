@@ -211,7 +211,7 @@ class strategy(object):
 						crypto+=(balance/close_price)*0.99 #close price, excluding 0.1% fee
 						balance=0# after buying crypto
 						#time,price, crypto, balance
-						recorded_transaction.append(("buying_bearish",date,close_price,crypto,balance)) 
+						recorded_transaction.append(("buying","buying_bearish",date,close_price,crypto,balance)) 
 						logger.debug("Purchase at %s: %s at price %s - current balance: %s",str(date),str(crypto),str(close_price),str(balance))
 					if row==data_length-1:
 						recommendation="buy bearish"
@@ -222,7 +222,7 @@ class strategy(object):
 							crypto+=(balance/close_price)*0.99 #close price, excluding 0.1% fee
 							balance=0# after buying crypto
 							#time,price, crypto, balance
-							recorded_transaction.append(("buying_bullish",date,close_price,crypto,balance)) 
+							recorded_transaction.append(("buying","buying_bullish",date,close_price,crypto,balance)) 
 							logger.debug("Purchase at %s: %s at price %s - current balance: %s",str(date),str(crypto),str(close_price),str(balance))
 							#provide recommendation via telegram
 						if row==data_length-1:
@@ -237,7 +237,7 @@ class strategy(object):
 					crypto+=(balance/close_price)*0.99 #close price, excluding 0.1% fee
 					balance=0# after buying crypto
 					#time,price, crypto, balance
-					recorded_transaction.append(("buying_bullish_confirmed",date,close_price,crypto,balance)) 
+					recorded_transaction.append(("buying","buying_bullish_confirmed",date,close_price,crypto,balance)) 
 					logger.debug("Purchase at %s: %s at price %s - current balance: %s",str(date),str(crypto),str(close_price),str(balance))
 					#provide recommendation via telegram
 				if row==data_length-1:
@@ -252,7 +252,7 @@ class strategy(object):
 						logger.debug("Sell at %s: %s at price %s - current balance: %s",str(date),str(crypto),str(close_price),str(balance))
 						crypto=0
 						#time,price, crypto, balance
-						recorded_transaction.append(("selling_bearish",date,close_price,crypto,balance)) 
+						recorded_transaction.append(("selling","selling_bearish",date,close_price,crypto,balance)) 
 					if row==data_length-1:
 						recommendation="sell bearish"
 				if (is_bullish and rsi>selling_rsi_bullish):
@@ -261,7 +261,7 @@ class strategy(object):
 						logger.debug("Sell at %s: %s at price %s - current balance: %s",str(date),str(crypto),str(close_price),str(balance))
 						crypto=0
 						#time,price, crypto, balance
-						recorded_transaction.append(("selling_bullish",date,close_price,crypto,balance)) 
+						recorded_transaction.append(("selling","selling_bullish",date,close_price,crypto,balance)) 
 					if row==data_length-1:
 						recommendation="sell bullish"
 				
