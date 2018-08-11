@@ -1,4 +1,4 @@
-from bokeh.io import output_file, show
+from bokeh.io import output_file, show,save
 from bokeh.plotting import figure
 from bokeh.layouts import layout
 from bokeh.models import Span, CrosshairTool, HoverTool, ResetTool, PanTool, WheelZoomTool, BoxZoomTool, ColumnDataSource, BoxAnnotation, LabelSet
@@ -8,23 +8,24 @@ import time
 from datetime import datetime as dt 
 
 class chart():
-	def __init__(self, df, result):
-		self.data= self.read_data(df)
+	def __init__(self, data, result):
+		self.data= data
 		self.sell, self.buy = self.sep_results(result) 
 
-	def read_data(self, data):
-		df = pd.read_csv(data)
-		df["datetime"] = pd.to_datetime(df["datetime"])
-		return df
+	# def read_data(self, data):
+	# 	# df = pd.read_csv(data)
+	# 	data["datetime"] = pd.to_datetime(data["datetime"])
+	# 	return data
 	def sep_results(self, result):
-		p = pd.read_csv(result).recorded_transaction
+		# p = pd.read_csv(result).recorded_transaction
 		#Take the content of recorded_transaction and turn it from string list to python list
-		for i in p:
-			p = i
-		plot = "f= " + p
-		exec(plot) #execute the function in string "f = [(),(),()]"
+		# for i in p:
+		# 	p = i
+		# plot = "f= " + p
+		# exec(plot) #execute the function in string "f = [(),(),()]"
 		#Convert the matrix to dataframe
-		f = pd.DataFrame(f, columns=['action', 'datetime', 'price', 'amount_cryp', 'balance'])
+		f=result["recorded_transaction"]
+		f = pd.DataFrame(f, columns=['action','description', 'datetime', 'price', 'amount_cryp', 'balance'])
 		f["datetime"] = pd.to_datetime(f["datetime"])
 		#Separate selling records from buying records
 		sell= f.loc[f['action']=='selling']
@@ -43,9 +44,10 @@ class chart():
 		p.grid.grid_line_alpha=0.1 #adds gridlines(the higher the number the visual the lines) 	
 		p.background_fill_color ="black"
 		#Adding the candlesticks
-		p.segment(df.datetime, df.high, df.datetime, df.low, source=ColumnDataSource(df), color="#EAECEE") #adds the tails of candlesticks
-		p.vbar(df.datetime[inc], w, df.open[inc], df.close[inc], source=ColumnDataSource(df), color="green", name="inc")
-		p.vbar(df.datetime[dec], w, df.open[dec], df.close[dec], source=ColumnDataSource(df), color="red", name="dec")
+		#adds the tails of candlesticks
+		p.segment(x0=df.datetime, y0=df.high,x1= df.datetime, y1=df.low, color="#EAECEE")  #source=ColumnDataSource(df)
+		p.vbar(x=df.datetime[inc], width=w, top=df.open[inc], bottom=df.close[inc],  color="green", name="inc") #source=ColumnDataSource(df),
+		p.vbar(x=df.datetime[dec], width=w, top=df.open[dec], bottom=df.close[dec],  color="red", name="dec") #source=ColumnDataSource(df),
 		return p
 	def rsi(self, candlestick, period, bot, top):
 		rsi = figure(width=3000, height=150, x_range= candlestick.x_range, x_axis_type="datetime")
@@ -119,11 +121,6 @@ class chart():
 		self.plot_results(candlestick,rsi,stoch_rsi,macd)
 
 		l=layout([[candlestick], [rsi],[stoch_rsi],[macd]])
-		output_file("%s.html",name)
-		show(l)
-
-
-				
-fig = chart("C:/Users/Ababalic/Documents/GitHub/CryptoTrading/XRP_EUR.csv","C:/Users/Ababalic/Documents/GitHub/CryptoTrading/XRP_EUR_result.csv")
-fig.output_charts("test",17,30,70,3,3)
-
+		output_file("charts/"+name.replace("/","")+".html",title="Crypto chart for "+name)
+		#show(l)
+		save(l)
