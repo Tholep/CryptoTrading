@@ -32,7 +32,7 @@ def main():
 
 	try:
 		telegram=TelegramNotifier(conf["notifier"]["telegram"]["api"],conf["notifier"]["telegram"]["chat_id"])
-		logger.info("Loaded telegram")
+		logger.debug("Loaded telegram")
 	except Exception as e:
 		logger.error("Cannot load telegram object",exc_info=True)
 	
@@ -52,7 +52,7 @@ def main():
 		time_unit=symbol_conf[symbol]["time_unit"]
 		candles=symbol_conf[symbol]["candles"]
 		#get historical data from symbol and symbol identified
-		logger.info("Get historical data %s:%s",exchange,symbol)
+		logger.debug("Get historical data %s:%s",exchange,symbol)
 		try:
 			data=ex.get_historical_data(symbol,exchange,time_unit,candles)
 		except Exception as e:
@@ -61,7 +61,7 @@ def main():
 		
 		data=to_dataframe(data)
 		# Aplly strategy(s) to collected data
-		logger.info("bruteforce strategies for %s",symbol)
+		logger.debug("Bruteforce strategies for %s",symbol)
 		tatics=strategy(data,symbol,symbol_conf[symbol],conf["indicators"])
 		results=tatics.strategy_launcher()
 		#logger.info(results)
