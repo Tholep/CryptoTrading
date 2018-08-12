@@ -1,0 +1,115 @@
+indicators:
+  buying:
+    confirmed_bullish:
+    - 5
+    - 15
+    - 5
+    fast_k:
+    - 10
+    - 20
+    - 3
+    macdhist:
+    - 1
+    - 1
+    - 5
+    rsi:
+    - 20
+    - 40
+    - 3
+    rsi_bullish:
+    - 40
+    - 60
+    - 3
+    rsi_midpoint:
+    - 50
+    - 55
+    - 5
+  selling:
+    fast_k:
+    - 70
+    - 90
+    - 5
+    rsi:
+    - 60
+    - 70
+    - 3
+    rsi_bullish:
+    - 70
+    - 85
+    - 3
+  stoch_rsi:
+    fast_d: 3
+    fast_k: 3
+    period:
+    - 17
+    - 17
+    - 3
+logging:
+  disable_existing_loggers: false
+  formatters:
+    simple:
+      format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  handlers:
+    console:
+      class: logging.StreamHandler
+      formatter: simple
+      level: INFO
+      stream: ext://sys.stdout
+    error_file_handler:
+      backupCount: 20
+      class: logging.handlers.RotatingFileHandler
+      encoding: utf8
+      filename: logs/errors_OMGETH.log
+      formatter: simple
+      level: ERROR
+      maxBytes: 10485760
+    info_file_handler:
+      backupCount: 20
+      class: logging.handlers.RotatingFileHandler
+      encoding: utf8
+      filename: logs/info_OMGETH.log
+      formatter: simple
+      level: INFO
+      maxBytes: 10485760
+    debug_file_handler:
+      backupCount: 20
+      class: logging.handlers.RotatingFileHandler
+      encoding: utf8
+      filename: logs/debug_OMGETH.log
+      formatter: simple
+      level: DEBUG
+      maxBytes: 10485760
+  root:
+    handlers:
+    - console
+    - info_file_handler
+    - error_file_handler
+    - debug_file_handler
+    level: INFO
+  version: 1
+symbol:
+  OMG/ETH:
+    candles: 500
+    exchange: binance
+    strategies: 
+      - macd_rsi_stochrsi_strategy_finder
+    time_unit: 5m
+    wallet: 1000
+    percentage: 100
+  ADA/ETH:
+    candles: 500
+    exchange: binance
+    strategies: 
+      - macd_rsi_stochrsi_strategy_finder
+    time_unit: 5m
+    wallet: 1000
+    percentage: 100
+  ETC/ETH:
+    candles: 500
+    exchange: binance
+    strategies: 
+      - macd_rsi_stochrsi_strategy_finder
+    time_unit: 5m
+    wallet: 1000
+    percentage: 100
+  

@@ -7,8 +7,6 @@ import pandas
 from talib import abstract
 
 
-
-
 class indicators():
     def __init__(self):
         """
