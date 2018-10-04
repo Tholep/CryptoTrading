@@ -10,23 +10,66 @@ import os
 #import modules
 from historicaldata import HistorialData
 from notifier import TelegramNotifier
-from strategy import strategy
-#set up logger
+from strategy import macd_rsi_stochrsi
+from utilities import *
+#from utilities import create_db
+
+
+#check and setup initial environment
 try:
 	conf=yaml.load(open("conf/conf_recommender.yml"))
 except Exception as e:
 	raise e
+try:
+	if not os.path.exists("logs"):
+		os.makedirs("logs")
+	# if not os.path.exists("charts"):
+	# 	os.makedirs("charts")
+	# if not os.path.exists("db"):
+	# 	os.makedirs("db")
+	# if not os.path.exists("db/crypto.db"):
+	# 	create_db()
+except Exception as e:
+		logger.error("Cannot create neccessary directories for operations",exc_info=True)
+
+
+
+#set up logger
 logging.config.dictConfig(conf["logging"])
 logger = logging.getLogger(__name__)
 
-def to_dataframe(data_array):
-	dataframe = df(data_array)
-	dataframe.columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
-	dataframe['datetime'] = dataframe.timestamp.apply(
-		lambda x: pandas.to_datetime(datetime.fromtimestamp(x / 1000).strftime('%c')))
-        dataframe.set_index('datetime', inplace=True, drop=True)
-        dataframe.drop('timestamp', axis=1, inplace=True)
-        return dataframe
+def virtual_trans(conn,symbol,price,recommendation,dt):
+
+	#get info of virtual wallet
+	v_wallet=get_virtual_wallet(conn,symbol)
+	if isinstance(v_wallet,tuple):
+		logger.info("Check to perform trasaction in Virtual wallet for %s",symbol)
+		coin,return_budget,nr_of_coins=v_wallet
+		# take action from recommendation . e.g. Sell Bullish --> Sell
+		action=recommendation.split(" ")[0]
+		if action == "buy":
+			if return_budget > 0:
+				logger.info("Perform purchase action from virtual wallet for %s",symbol)
+				nr_of_coins_purchased = return_budget/price
+				return_budget=0
+				nr_of_coins +=nr_of_coins_purchased
+
+				#update virtual wallet
+				update_virtual_wallet(conn,[float(return_budget),float(nr_of_coins),symbol])
+				insert_virtual_wallet_transaction(conn,[symbol,dt,action,float(price),recommendation])
+
+				
+		else: #sell
+			if nr_of_coins > 0:
+				logger.info("Perform selling action from virtual wallet for %s",symbol)
+				return_budget +=nr_of_coins*price
+				nr_of_coins=0
+		
+				#update virtual wallet
+				update_virtual_wallet(conn,[float(return_budget),float(nr_of_coins),symbol])
+				insert_virtual_wallet_transaction(conn,[symbol,dt,action,float(price),recommendation])
+
+
 
 def main():
 
@@ -35,126 +78,78 @@ def main():
 		logger.debug("Loaded telegram")
 	except Exception as e:
 		logger.error("Cannot load telegram object",exc_info=True)
-	
-	try:
-		if not os.path.exists("logs"):
-			os.makedirs("logs")
-		if not os.path.exists("charts"):
-			os.makedirs("charts")
-	except Exception as e:
-		logger.error("Cannot create neccessary directories for operations",exc_info=True)
-		
+			
 	symbol_conf=conf["symbol"]
 	ex=HistorialData(symbol_conf)
-	for symbol in symbol_conf.keys():
+	# connect to database
+	conn=connect_db()
 
+
+	for symbol in symbol_conf.keys():
+		normalised_symbol=symbol.split("_")[0] # symbol can be ETH/EUR_1D ETH/EUR_1H --> only get ETH/EUR to get historical data from exchange
 		exchange=symbol_conf[symbol]["exchange"]
 		time_unit=symbol_conf[symbol]["time_unit"]
 		candles=symbol_conf[symbol]["candles"]
 		#get historical data from symbol and symbol identified
 		logger.debug("Get historical data %s:%s",exchange,symbol)
 		try:
-			data=ex.get_historical_data(symbol,exchange,time_unit,candles)
+			data=ex.get_historical_data(normalised_symbol,exchange,time_unit,candles)
 		except Exception as e:
 			logger.error("Error in retrieving historical data for %s",symbol,exc_info=True)
 			continue
 		
 		data=to_dataframe(data)
 		# Aplly strategy(s) to collected data
-		logger.debug("Bruteforce strategies for %s",symbol)
-		tatics=strategy(data,symbol,symbol_conf[symbol],conf["indicators"])
-		results=tatics.strategy_launcher()
-		#logger.info(results)
-		#temporary test of results
 		for st in symbol_conf[symbol]["strategies"]:
-			#only process if there are strategies that are profitable
-			if not results[st].empty:
-				trading_result=results[st]
-				#for trading_result in strategy_result:
-				message=symbol + ":" + st +"/n"
-				# frame=df(trading_result)
-				# frame.columns=["period","fast_k_period","fast_d_period","selling_rsi","selling_rsi_bullish","selling_stoch_rsi","buying_rsi","buying_rsi_bullish","buying_stoch_rsi","buying_confirmed_pullish","buying_rsi_midpoint","buying_macdhist","balance","profit","recorded_transaction","recommendation"]
-				# frame=frame.sort_values("profit")
-				logger.info("Results for symbol: %s",symbol)
-				logger.info("\n%s",trading_result)
-				message+=str(trading_result)+"\n"
-				logger.info("Transaction details:")
-				for ts in trading_result["recorded_transaction"]:
-					logger.info("%s",ts)
-					#message+=str(ts)
-				try:
-					if trading_result["recommendation"]!="no":
+			klass=globals()[st]
+			tatics=klass(data,symbol,symbol_conf[symbol],conf["indicators"])
+			result=tatics.launch()
+			#column of result
+			#		["period","fast_k_period","fast_d_period","selling_rsi","selling_rsi_bullish","selling_stoch_rsi",\
+			#		"buying_rsi","buying_rsi_bullish","buying_stoch_rsi","buying_confirmed_pullish","buying_rsi_midpoint",\
+			#		"buying_macdhist","balance","profit","recorded_transaction","recommendation"]
+			logger.info("Results for symbol: %s",symbol)
+			logger.info("\n%s",result)
+
+			
+			
+			# if the symbol is profitable
+			if isinstance(result,tuple):
+				#insert results to backtest_wallet and backtest_wallet_transaction
+				dt=str(datetime.now())
+				#columns: symbol,date, return_budget,profit
+				backtest_data=[symbol,dt,float(result[-4]),float(result[-3])]
+				insert_backtest_wallet(conn,backtest_data)
+				for tx in result[-2]:
+					#columns: symbol,date,date_of_action,action,price,description
+					backtest_trans_data=[symbol,dt,str(tx[2]),tx[0],float(tx[3]),tx[1]]
+					insert_backtest_wallet_transaction(conn,backtest_trans_data)
+				
+				recommendation=result[-1]
+				if recommendation!="no":
+					message=symbol + ":" + st +"\n"
+					message+="Date time: %s" % (str(datetime.now())) + "\n"
+					profit=result[-3]
+					total_budget=result[-4]
+					price=data.iloc[-1]["close"]
+					initial_budget=symbol_conf[symbol]["wallet"]
+					message+="Initial budget: %s" % (str(initial_budget)) + "\n"
+					message+="Total budget: %s" % (str(total_budget)) + "\n"
+					message+="Profit: %s%%" % (str(profit)) + "\n"
+					message+="Recommendation: %s @ price %s" % (str(recommendation),str(price)) + "\n"
+
+					#insert into recommendation table
+					#columns: symbol, date , action, price, description
+					recommendation_data=[symbol,dt,recommendation.split(" ")[0],float(price),recommendation]
+					insert_recommendation(conn,recommendation_data)
+
+					#Perform virtual transactions
+					virtual_trans(conn,symbol,price,recommendation,dt)
+					try:
 						telegram.notify(message)
-				except Exception as e:
-					logger.error("Telegram is having error and cannot send message(s)")
-				#check configuration and update with new parameters if having
-				if "indicators" in symbol_conf[symbol]:
-					# stochastic RSI parameters
-					if symbol_conf[symbol]["indicators"]["stoch_rsi"]["period"] != trading_result["period"]:
-						logger.info("Change stoch_rsi_period from %s to %s", str(symbol_conf[symbol]["indicators"]["stoch_rsi"]["period"]),str(trading_result["period"]))
-						symbol_conf[symbol]["indicators"]["stoch_rsi"]["period"] = int(trading_result["period"])
-
-					if symbol_conf[symbol]["indicators"]["stoch_rsi"]["fast_k"] != trading_result["fast_k_period"]:
-						logger.info("Change stoch_rsi_fast_k from %s to %s", str(symbol_conf[symbol]["indicators"]["stoch_rsi"]["fast_k"]),str(trading_result["fast_k_period"]))
-						symbol_conf[symbol]["indicators"]["stoch_rsi"]["fast_k"] = int(trading_result["fast_k_period"])
-
-
-					if symbol_conf[symbol]["indicators"]["stoch_rsi"]["fast_d"] != trading_result["fast_d_period"]:
-						logger.info("Change stoch_rsi_fast_d from %s to %s", str(symbol_conf[symbol]["indicators"]["stoch_rsi"]["fast_d"]),str(trading_result["fast_d_period"]))
-						symbol_conf[symbol]["indicators"]["stoch_rsi"]["fast_d"] = int(trading_result["fast_d_period"])
-					#selling indicators
-					if symbol_conf[symbol]["indicators"]["selling"]["rsi"] != trading_result["selling_rsi"]:
-						logger.info("Change selling_rsi from %s to %s", str(symbol_conf[symbol]["indicators"]["selling"]["rsi"]),str(trading_result["selling_rsi"]))
-						symbol_conf[symbol]["indicators"]["selling"]["rsi"] = int(trading_result["selling_rsi"])
-					
-					if symbol_conf[symbol]["indicators"]["selling"]["rsi_bullish"] != trading_result["selling_rsi_bullish"]:
-						logger.info("Change selling_rsi_bullish from %s to %s", str(symbol_conf[symbol]["indicators"]["selling"]["rsi_bullish"]),str(trading_result["selling_rsi_bullish"]))
-						symbol_conf[symbol]["indicators"]["selling"]["rsi_bullish"] = int(trading_result["selling_rsi_bullish"])
-
-					if symbol_conf[symbol]["indicators"]["selling"]["fast_k"] != trading_result["selling_stoch_rsi"]:
-						logger.info("Change selling_stoch_rsi from %s to %s", str(symbol_conf[symbol]["indicators"]["selling"]["fast_k"]),str(trading_result["selling_stoch_rsi"]))
-						symbol_conf[symbol]["indicators"]["selling"]["rsi"] = int(trading_result["selling_rsi"])
-					
-					#buying indicators
-					if symbol_conf[symbol]["indicators"]["buying"]["rsi"] != trading_result["buying_rsi"]:
-						logger.info("Change buying_rsi from %s to %s", str(symbol_conf[symbol]["indicators"]["buying"]["rsi"]),str(trading_result["buying_rsi"]))
-						symbol_conf[symbol]["indicators"]["buying"]["rsi"] = int(trading_result["buying_rsi"])
-
-					if symbol_conf[symbol]["indicators"]["buying"]["rsi_bullish"] != trading_result["buying_rsi_bullish"]:
-						logger.info("Change buying_rsi_bullish from %s to %s", str(symbol_conf[symbol]["indicators"]["buying"]["rsi_bullish"]),str(trading_result["buying_rsi_bullish"]))
-						symbol_conf[symbol]["indicators"]["buying"]["rsi_bullish"] = int(trading_result["buying_rsi_bullish"])
-
-					if symbol_conf[symbol]["indicators"]["buying"]["fast_k"] != trading_result["buying_stoch_rsi"]:
-						logger.info("Change buying_stoch_rsi from %s to %s", str(symbol_conf[symbol]["indicators"]["buying"]["fast_k"]),str(trading_result["buying_stoch_rsi"]))
-						symbol_conf[symbol]["indicators"]["buying"]["fast_k"] = int(trading_result["buying_stoch_rsi"])
-
-
-					if symbol_conf[symbol]["indicators"]["buying"]["confirmed_bullish"] != trading_result["buying_confirmed_pullish"]:
-						logger.info("Change buying_confirmed_pullish from %s to %s", str(symbol_conf[symbol]["indicators"]["buying"]["confirmed_bullish"]),str(trading_result["buying_confirmed_pullish"]))
-						symbol_conf[symbol]["indicators"]["buying"]["confirmed_bullish"] = int(trading_result["buying_confirmed_pullish"])
-
-					if symbol_conf[symbol]["indicators"]["buying"]["rsi_midpoint"] != trading_result["buying_rsi_midpoint"]:
-						logger.info("Change buying_rsi_midpoint from %s to %s", str(symbol_conf[symbol]["indicators"]["buying"]["rsi_midpoint"]),str(trading_result["buying_rsi_midpoint"]))
-						symbol_conf[symbol]["indicators"]["buying"]["rsi_midpoint"] = int(trading_result["buying_rsi_midpoint"])
-
-
-					if symbol_conf[symbol]["indicators"]["buying"]["macdhist"] != trading_result["buying_macdhist"]:
-						logger.info("Change buying_macdhist from %s to %s", str(symbol_conf[symbol]["indicators"]["buying"]["macdhist"]),str(trading_result["buying_macdhist"]))
-						symbol_conf[symbol]["indicators"]["buying"]["macdhist"] = int(trading_result["buying_macdhist"])
-				else:
-					indicators={"selling":{"rsi":int(trading_result["selling_rsi"]),"rsi_bullish":int(trading_result["selling_rsi_bullish"]), "fast_k":int(trading_result["selling_stoch_rsi"])},\
-								"buying":{"rsi":int(trading_result["buying_rsi"]),"rsi_bullish":int(trading_result["buying_rsi_bullish"]), "fast_k":int(trading_result["buying_stoch_rsi"]),\
-								"confirmed_bullish":int(trading_result["buying_confirmed_pullish"]),"rsi_midpoint":int(trading_result["buying_rsi_midpoint"]),\
-								"macdhist":int(trading_result["buying_macdhist"])},\
-								"stoch_rsi":{"period":int(trading_result["period"]),"fast_k":int(trading_result["fast_k_period"]),"fast_d":int(trading_result["fast_d_period"])}}
-					symbol_conf[symbol]["indicators"]=indicators
-			else:
-				logger.info("There is no profitable strategy found for this symbol")
-		#Automatically update configuration file
-		conf["symbol"]=symbol_conf
-		with open('conf.yml', 'w') as outfile:
-			yaml.dump(conf, outfile, default_flow_style=False)
-					
+					except Exception as e:
+						logger.error("Telegram is having error and cannot send message(s)")
+				break
 if __name__ == "__main__":
     try:
         main()

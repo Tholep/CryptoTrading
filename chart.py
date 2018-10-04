@@ -9,6 +9,14 @@ from datetime import datetime as dt
 
 class chart():
 	def __init__(self, data, result):
+		"""
+		This class to illustrate pricing chart as well as buy/sell decision
+
+		Args:
+			data: is dataframe of candle stick price
+			result: buy/sell transaction
+
+		"""
 		self.data= data
 		self.sell, self.buy = self.sep_results(result) 
 
@@ -17,6 +25,12 @@ class chart():
 	# 	data["datetime"] = pd.to_datetime(data["datetime"])
 	# 	return data
 	def sep_results(self, result):
+		"""
+		Args:
+			result: is a dataframe of transaction
+
+		Return: sell and buy decisions dataframe
+		"""
 		# p = pd.read_csv(result).recorded_transaction
 		#Take the content of recorded_transaction and turn it from string list to python list
 		# for i in p:

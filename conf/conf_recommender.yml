@@ -112,7 +112,7 @@ symbol:
         fast_k: 3
         period: 17
     strategies:
-    - macd_rsi_stochrsi_strategy_finder
+    - macd_rsi_stochrsi
     time_unit: 1d
     wallet: 5000
   BCH/EUR:
@@ -135,7 +135,7 @@ symbol:
         fast_k: 3
         period: 17
     strategies:
-    - macd_rsi_stochrsi_strategy_finder
+    - macd_rsi_stochrsi
     time_unit: 1d
     wallet: 5000
   BNB/ETH:
@@ -158,7 +158,7 @@ symbol:
         fast_k: 3
         period: 17
     strategies:
-    - macd_rsi_stochrsi_strategy_finder
+    - macd_rsi_stochrsi
     time_unit: 1d
     wallet: 5000
   DASH/EUR:
@@ -181,7 +181,7 @@ symbol:
         fast_k: 3
         period: 17
     strategies:
-    - macd_rsi_stochrsi_strategy_finder
+    - macd_rsi_stochrsi
     time_unit: 1d
     wallet: 5000
   ETC/EUR:
@@ -204,7 +204,7 @@ symbol:
         fast_k: 3
         period: 17
     strategies:
-    - macd_rsi_stochrsi_strategy_finder
+    - macd_rsi_stochrsi
     time_unit: 1d
     wallet: 5000
   ETH/EUR:
@@ -227,7 +227,7 @@ symbol:
         fast_k: 3
         period: 17
     strategies:
-    - macd_rsi_stochrsi_strategy_finder
+    - macd_rsi_stochrsi
     time_unit: 1d
     wallet: 5000
   IOTA/ETH:
@@ -250,7 +250,7 @@ symbol:
         fast_k: 3
         period: 17
     strategies:
-    - macd_rsi_stochrsi_strategy_finder
+    - macd_rsi_stochrsi
     time_unit: 1d
     wallet: 5000
   LTC/EUR:
@@ -273,7 +273,7 @@ symbol:
         fast_k: 3
         period: 17
     strategies:
-    - macd_rsi_stochrsi_strategy_finder
+    - macd_rsi_stochrsi
     time_unit: 1d
     wallet: 5000
   OMG/ETH:
@@ -296,7 +296,7 @@ symbol:
         fast_k: 3
         period: 17
     strategies:
-    - macd_rsi_stochrsi_strategy_finder
+    - macd_rsi_stochrsi
     time_unit: 1d
     wallet: 5000
   QTUM/ETH:
@@ -319,7 +319,7 @@ symbol:
         fast_k: 3
         period: 17
     strategies:
-    - macd_rsi_stochrsi_strategy_finder
+    - macd_rsi_stochrsi
     time_unit: 1d
     wallet: 5000
   TRX/ETH:
@@ -342,7 +342,7 @@ symbol:
         fast_k: 3
         period: 17
     strategies:
-    - macd_rsi_stochrsi_strategy_finder
+    - macd_rsi_stochrsi
     time_unit: 1d
     wallet: 5000
   XMR/EUR:
@@ -365,7 +365,7 @@ symbol:
         fast_k: 3
         period: 17
     strategies:
-    - macd_rsi_stochrsi_strategy_finder
+    - macd_rsi_stochrsi
     time_unit: 1d
     wallet: 5000
   XRP/EUR:
@@ -388,7 +388,7 @@ symbol:
         fast_k: 3
         period: 17
     strategies:
-    - macd_rsi_stochrsi_strategy_finder
+    - macd_rsi_stochrsi
     time_unit: 1d
     wallet: 5000
   ZEC/EUR:
@@ -411,6 +411,6 @@ symbol:
         fast_k: 3
         period: 17
     strategies:
-    - macd_rsi_stochrsi_strategy_finder
+    - macd_rsi_stochrsi
     time_unit: 1d
     wallet: 5000

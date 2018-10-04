@@ -52,7 +52,9 @@ class indicators():
 
         Args:
             historical_data (list): A matrix of historical OHCLV data.
-         Returns:
+         
+         
+        Returns:
             pandas.DataFrame: A historical_data containing the indicators and hot/cold values.
         """
 

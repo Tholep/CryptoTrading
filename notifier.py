@@ -4,7 +4,6 @@
 import telegram
 import logging
 logger = logging.getLogger(__name__)
-# from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 
 
 class TelegramNotifier():
@@ -18,18 +17,11 @@ class TelegramNotifier():
             token (str): The telegram API token.
             chat_id (str): The chat ID you want the bot to send messages to.
 
-
         """
 
         self.bot = telegram.Bot(token=token)
         self.chat_id = chat_id
 
-
-        # @retry(
-        #     retry=retry_if_exception_type(telegram.error.TimedOut),
-        #     stop=stop_after_attempt(3),
-        #     wait=wait_fixed(5)
-        # )
     def chunk_message(self, message, max_message_size):
         """ Chunks message so that it meets max size of integration.
 

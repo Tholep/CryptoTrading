@@ -34,9 +34,6 @@ class HistorialData(object):
     def get_historical_data(self, symbol, exchange, time_unit="1d", limit=100):
         """Get historical OHLCV for a symbol pair
 
-        Decorators:
-            retry
-
         Args:
             symbol (str): Contains the symbol to operate on i.e. BURST/BTC
             exchange (str): Contains the exchnageto fetch the historical data from.
