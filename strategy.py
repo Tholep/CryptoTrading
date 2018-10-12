@@ -4,7 +4,7 @@ import time
 from analyzer import indicators
 import datetime
 import sys
-from chart import chart
+# from chart import chart
 import multiprocessing as mp
 import logging
 from utilities import *
