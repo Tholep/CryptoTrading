@@ -1,7 +1,6 @@
 import pandas
 from pandas import DataFrame as df
 from datetime import datetime
-import sqlite3
 import logging
 logger = logging.getLogger(__name__)
 import mysql.connector
@@ -35,8 +34,18 @@ def connect_db():
 def create_db(conn):
 	#conn to the mysql server
 	# Create database
+	"""
 	#CREATE USER 'crypto'@'localhost' IDENTIFIED BY 'Crypto@Trading@Algorithm@3009';
 	#GRANT ALL PRIVILEGES ON crypto.* TO 'crypto'@'localhost';
+	SELECT user, host, plugin FROM mysql.user;
+	If you see unix_socket in the plugin column, that's the reason.
+
+	To return to the usual password authentication, run
+
+	UPDATE mysql.user SET plugin = '' WHERE plugin = 'unix_socket';
+	FLUSH PRIVILEGES;	
+	"""
+
 	#check if db is existed
 	try:
 		mycursor = conn.cursor()
