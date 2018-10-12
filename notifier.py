@@ -1,7 +1,9 @@
 """Notify a user via telegram
 """
-
-import telegram
+try:
+    import telegram
+except:
+    pass
 import logging
 logger = logging.getLogger(__name__)
 

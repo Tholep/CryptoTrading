@@ -4,4 +4,4 @@ pandas==0.22.0
 TA-lib==0.4.15
 python-telegram-bot==10.0.1
 pyyaml==3.12
-mysql
+mysql-connector
