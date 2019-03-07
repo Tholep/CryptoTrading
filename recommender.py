@@ -23,16 +23,9 @@ except Exception as e:
 try:
 	if not os.path.exists("logs"):
 		os.makedirs("logs")
-	# if not os.path.exists("charts"):
-	# 	os.makedirs("charts")
-	# if not os.path.exists("db"):
-	# 	os.makedirs("db")
-	# if not os.path.exists("db/crypto.db"):
-	# 	create_db()
+
 except Exception as e:
 		logger.error("Cannot create neccessary directories for operations",exc_info=True)
-
-
 
 #set up logger
 logging.config.dictConfig(conf["logging"])
@@ -57,8 +50,7 @@ def virtual_trans(conn,symbol,price,recommendation,dt):
 				#update virtual wallet
 				update_virtual_wallet(conn,[float(return_budget),float(nr_of_coins),symbol])
 				insert_virtual_wallet_transaction(conn,[symbol,dt,action,float(price),recommendation])
-
-				
+	
 		else: #sell
 			if nr_of_coins > 0:
 				logger.info("Perform selling action from virtual wallet for %s",symbol)
@@ -68,8 +60,6 @@ def virtual_trans(conn,symbol,price,recommendation,dt):
 				#update virtual wallet
 				update_virtual_wallet(conn,[float(return_budget),float(nr_of_coins),symbol])
 				insert_virtual_wallet_transaction(conn,[symbol,dt,action,float(price),recommendation])
-
-
 
 def main():
 
@@ -83,7 +73,6 @@ def main():
 	ex=HistorialData(symbol_conf)
 	# connect to database
 	conn=connect_db()
-
 
 	for symbol in symbol_conf.keys():
 		normalised_symbol=symbol.split("_")[0] # symbol can be ETH/EUR_1D ETH/EUR_1H --> only get ETH/EUR to get historical data from exchange
@@ -104,14 +93,8 @@ def main():
 			klass=globals()[st]
 			tatics=klass(data,symbol,symbol_conf[symbol],conf["indicators"])
 			result=tatics.launch()
-			#column of result
-			#		["period","fast_k_period","fast_d_period","selling_rsi","selling_rsi_bullish","selling_stoch_rsi",\
-			#		"buying_rsi","buying_rsi_bullish","buying_stoch_rsi","buying_confirmed_pullish","buying_rsi_midpoint",\
-			#		"buying_macdhist","balance","profit","recorded_transaction","recommendation"]
 			logger.info("Results for symbol: %s",symbol)
 			logger.info("\n%s",result)
-
-			
 			
 			# if the symbol is profitable
 			if isinstance(result,tuple):

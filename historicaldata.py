@@ -16,6 +16,7 @@ class HistorialData(object):
         Args:
             symbol_conf (dictionary taken from conf.yml): A dictionary coins/tokens with an associated market and a desired time frame to obtain data
         """
+       
         self.exchanges = dict() 
         # Loads symbols using ccxt.
         for symbol in symbol_conf.keys():
@@ -43,6 +44,7 @@ class HistorialData(object):
         Returns:
             list: Contains a list of lists which contain timestamp, open, high, low, close, volume.
         """
+        
         timeframe_regex = re.compile('([0-9]+)([a-zA-Z])')
         timeframe_matches = timeframe_regex.match(time_unit)
         time_quantity = timeframe_matches.group(1)
@@ -58,11 +60,8 @@ class HistorialData(object):
         }
         
         timedelta_args = { timedelta_values[time_period]: int(time_quantity) }
-
         delta = timedelta(**timedelta_args)
-
         max_days_date = datetime.utcnow() - (limit * delta)
-
         start_date = int((max_days_date - datetime(1970,1,1)).total_seconds() * 1000)
         try:
             
@@ -70,14 +69,11 @@ class HistorialData(object):
         except Exception as e:
             raise e
         
-
         if not historical_data:
-            #logger.error("Can't fetch historical data for %s - %s", (symbol,symbol))
             logger.info('No historical data provided returned by %s for symbol %s.',(exchange,symbol))
             
         # Sort by timestamp in ascending order
         historical_data.sort(key=lambda d: d[0])
-
         time.sleep(self.exchanges[exchange].rateLimit / 1000)
 
         return historical_data
